@@ -301,7 +301,8 @@ public class MainActivity extends AppCompatActivity {
                 case HEART_RATE:
                     String HeartRatetext = msg.getData().getString("HeartRate");
                     tv = (EditText)findViewById(R.id.labelHeartRate);
-                    System.out.println("Heart Rate Info is "+ HeartRatetext);
+                    //System.out.println("Heart Rate Info is "+ HeartRatetext);
+                    Log.i(TAG, "Heart Rate Info is "+ HeartRatetext);
                     if (tv != null)tv.setText(HeartRatetext);
                     break;
 
