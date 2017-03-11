@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Heartrate Monitor</string>
+    <string name="title_activity_team_monitoring">teamMonitoringActivity</string>
 </resources>
