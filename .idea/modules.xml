@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/HeartrateMonitor.iml" filepath="$PROJECT_DIR$/HeartrateMonitor.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/coen390-team-d.iml" filepath="$PROJECT_DIR$/coen390-team-d.iml" />
     </modules>
   </component>
 </project>

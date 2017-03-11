@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Heartrate Monitor</string>
+    <string name="bt_required">Bluetooth is required. Exiting...</string>
+    <string name="hello">Zephyr HxM example App</string>
+    <string name="labelHeartRate">000</string>
+    <string name="labelStatusMsg"></string>
 </resources>
