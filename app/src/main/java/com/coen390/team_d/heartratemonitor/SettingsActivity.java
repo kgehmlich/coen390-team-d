@@ -1,18 +1,17 @@
 package com.coen390.team_d.heartratemonitor;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class TeamMonitoringActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_team_monitoring);
+		setContentView(R.layout.activity_settings);
 	}
 	
 	/**
@@ -21,7 +20,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.team_monitoring_menu, menu);
+		inflater.inflate(R.menu.settings_menu, menu);
 		return true;
 	}
 	
@@ -33,8 +32,8 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
 		switch (item.getItemId()) {
-			case R.id.settings:
-				goToSettingsActivity();
+			case R.id.enableEdit:
+				//TODO enableEdit() function
 				break;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -42,8 +41,4 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		return true;
 	}
 	
-	private void goToSettingsActivity() {
-		Intent intent = new Intent(TeamMonitoringActivity.this, SettingsActivity.class);
-		startActivity(intent);
-	}
 }

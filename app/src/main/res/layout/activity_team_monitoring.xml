@@ -8,9 +8,6 @@
     tools:context="com.coen390.team_d.heartratemonitor.TeamMonitoringActivity">
 
 
-
-
-
     <ListView
         android:id="@+id/listView"
         android:layout_width="0dp"
