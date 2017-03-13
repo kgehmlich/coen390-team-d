@@ -10,8 +10,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.coen390.team_d.heartratemonitor.MainActivity">
 
-    <TextView
+    <Button
+        android:id="@+id/btnManual"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="73dp"
+        android:layout_marginStart="73dp"
+        android:layout_marginTop="59dp"
+        android:text="Send Alert" />
 </RelativeLayout>
