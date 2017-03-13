@@ -22,19 +22,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                Toast toast = Toast.makeText(getApplicationContext(), "*Alert has been <xccvxvc cvxzz<xcggvbb vt56TTFDCsent *", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(getApplicationContext(), "*Alert has been sent *", Toast.LENGTH_LONG);
                 toast.show();
 
-                // Email Notificacion call
-                try {
-                    EmailNotification sender = new EmailNotification("coen390teamd@gmail.com", "heartrate");
-                    sender.sendMail("message",
-                            "Test",
-                            "coen390teamd@gmail.com",
-                            "coen390teamd@gmail.com");
-                } catch (Exception e) {
-                    Log.e("SendMail", e.getMessage(), e);
-                }
+
             }
         });
 
