@@ -22,7 +22,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-qsa                toast.show();
+                Toast toast = Toast.makeText(getApplicationContext(), "*Alert has been <xccvxvc cvxzz<xcggvbb vt56TTFDCsent *", Toast.LENGTH_LONG);
+                toast.show();
 
                 // Email Notificacion call
                 try {
