@@ -1,23 +1,27 @@
 package com.coen390.team_d.heartratemonitor;
 
+import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Message;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -46,7 +50,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button alertButton = (Button) findViewById(R.id.alertButton);
+        alertButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                onClickAlertButton(v);
+            }
+        });
 
+        
         ///////////////////////////////
         // Set up bluetooth receiver //
         ///////////////////////////////
@@ -216,8 +230,55 @@ public class MainActivity extends AppCompatActivity {
         }*/
     }
 
+    private void onClickAlertButton(View v) {
+        Toast toast = Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG);
+        toast.show();
+    }
 
     /**
+     * Adds toolbar menu to this activity
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+    
+    /**
+     * Handles menu item clicks
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        
+        // If the "Enable Edit" menu button was clicked, make the text inputs editable
+        switch (item.getItemId()) {
+            case R.id.toggleMonitoring:
+                //TODO toggleMonitoring() function
+                break;
+            case R.id.teamMonitoring:
+                goToTeamMonitoringActivity();
+                break;
+            case R.id.settings:
+                goToSettingsActivity();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+    
+    private void goToTeamMonitoringActivity() {
+        Intent intent = new Intent(MainActivity.this, TeamMonitoringActivity.class);
+        startActivity(intent);
+    }
+    
+    private void goToSettingsActivity() {
+        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+        startActivity(intent);
+    }
+    
+     /**
      * Called when an activity that was created by this activity returns a result code
      * @param requestCode
      * @param resultCode
