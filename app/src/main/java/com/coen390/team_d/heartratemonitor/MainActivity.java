@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -13,8 +16,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Button alertButton = (Button) findViewById(R.id.alertButton);
+        alertButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                onClickAlertButton(v);
+            }
+        });
     }
-    
+
+    private void onClickAlertButton(View v) {
+        Toast toast = Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG);
+        toast.show();
+    }
+
     /**
      * Adds toolbar menu to this activity
      */
