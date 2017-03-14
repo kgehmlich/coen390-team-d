@@ -53,6 +53,7 @@ public class NewConnectedListener extends ConnectListenerImpl
 
                     //***************Displaying the Heart Rate********************************
                     int HRate =  HRSpeedDistPacket.GetHeartRate(DataArray);
+                    HRate = HRate & 0xFF;   // byte is unsigned, make remove sign extension
                     Message text1 = _aNewHandler.obtainMessage(HEART_RATE);
                     Bundle b1 = new Bundle();
                     b1.putString("HeartRate", String.valueOf(HRate));
