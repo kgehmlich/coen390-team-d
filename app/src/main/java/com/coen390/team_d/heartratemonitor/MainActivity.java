@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        
+
         ///////////////////////////////
         // Set up bluetooth receiver //
         ///////////////////////////////
@@ -92,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Obtaining the handle to act on the CONNECT button
-        TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
+        /*TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
         String ErrorText  = "Not Connected to HxM ! !";
-        tv.setText(ErrorText);
+        tv.setText(ErrorText);*/
 
         Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
         if (btnConnect != null)
@@ -122,69 +122,43 @@ public class MainActivity extends AppCompatActivity {
 
                     }
 
-                    //BhMacID = btDevice.getAddress();
                     BluetoothDevice Device = _btAdapter.getRemoteDevice(BhMacID);
                     String DeviceName = Device.getName();
                     _bt = new BTClient(_btAdapter, BhMacID);
                     _NConnListener = new NewConnectedListener(Newhandler,Newhandler);
                     _bt.addConnectedEventListener(_NConnListener);
 
-                    TextView tv1 = (EditText)findViewById(R.id.labelHeartRate);
-                    tv1.setText("000");
+                    TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
+                    tv1.setText("Heart Rate: 000");
 
-                    tv1 = (EditText)findViewById(R.id.labelInstantSpeed);
-                    tv1.setText("0.0");
-
-                    ((TextView) findViewById(R.id.MACaddr)).setText(BhMacID);
-
-                    //tv1 = 	(EditText)findViewById(R.id.labelSkinTemp);
-                    //tv1.setText("0.0");
-
-                    //tv1 = 	(EditText)findViewById(R.id.labelPosture);
-                    //tv1.setText("000");
-
-                    //tv1 = 	(EditText)findViewById(R.id.labelPeakAcc);
-                    //tv1.setText("0.0");
                     if(_bt.IsConnected())
                     {
                         _bt.start();
-                        TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-                        String ErrorText  = "Connected to HxM "+DeviceName;
-                        tv.setText(ErrorText);
-
-                        //Reset all the values to 0s
-
-                    }
-                    else
-                    {
-                        TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-                        String ErrorText  = "Unable to Connect !";
-                        tv.setText(ErrorText);
                     }
                 }
             });
         }
         /*Obtaining the handle to act on the DISCONNECT button*/
-        Button btnDisconnect = (Button) findViewById(R.id.ButtonDisconnect);
+        /*Button btnDisconnect = (Button) findViewById(R.id.ButtonDisconnect);
         if (btnDisconnect != null)
         {
             btnDisconnect.setOnClickListener(new View.OnClickListener() {
                 @Override
-				/*Functionality to act if the button DISCONNECT is touched*/
+				*//*Functionality to act if the button DISCONNECT is touched*//*
                 public void onClick(View v) {
-					/*Reset the global variables*/
+					*//*Reset the global variables*//*
                     TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
                     String ErrorText  = "Disconnected from HxM!";
                     tv.setText(ErrorText);
 
-					/*This disconnects listener from acting on received messages*/
+					*//*This disconnects listener from acting on received messages*//*
                     _bt.removeConnectedEventListener(_NConnListener);
-					/*Close the communication with the device & throw an exception if failure*/
+					*//*Close the communication with the device & throw an exception if failure*//*
                     _bt.Close();
 
                 }
             });
-        }
+        }*/
 
         // At this point bluetooth should be available and enabled
         // Attempt to find HxM monitor in paired devices
@@ -244,13 +218,13 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
-    
+
     /**
      * Handles menu item clicks
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        
+
         // If the "Enable Edit" menu button was clicked, make the text inputs editable
         switch (item.getItemId()) {
             case R.id.toggleMonitoring:
@@ -267,17 +241,17 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-    
+
     private void goToTeamMonitoringActivity() {
         Intent intent = new Intent(MainActivity.this, TeamMonitoringActivity.class);
         startActivity(intent);
     }
-    
+
     private void goToSettingsActivity() {
         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
         startActivity(intent);
     }
-    
+
      /**
      * Called when an activity that was created by this activity returns a result code
      * @param requestCode
@@ -361,19 +335,14 @@ public class MainActivity extends AppCompatActivity {
             {
                 case HEART_RATE:
                     String HeartRatetext = msg.getData().getString("HeartRate");
-                    tv = (EditText)findViewById(R.id.labelHeartRate);
+                    tv = (TextView)findViewById(R.id.instantBPMTextView);
                     //System.out.println("Heart Rate Info is "+ HeartRatetext);
-                    Log.i(TAG, "Heart Rate Info is "+ HeartRatetext);
-                    if (tv != null)tv.setText(HeartRatetext);
+                    //Log.i(TAG, "Heart Rate: " + HeartRatetext);
+                    if (tv != null)tv.setText("Heart Rate: " + HeartRatetext);
                     break;
 
-                case INSTANT_SPEED:
-                    String InstantSpeedtext = msg.getData().getString("InstantSpeed");
-                    tv = (EditText)findViewById(R.id.labelInstantSpeed);
-                    if (tv != null)tv.setText(InstantSpeedtext);
-
+                default:
                     break;
-
             }
         }
 
