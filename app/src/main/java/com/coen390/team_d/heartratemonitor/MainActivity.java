@@ -1,6 +1,7 @@
 package com.coen390.team_d.heartratemonitor;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -25,7 +26,11 @@ import android.widget.TextView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Set;
+
+import static java.util.concurrent.TimeUnit.*;
 
 import zephyr.android.HxMBT.BTClient;
 import zephyr.android.HxMBT.ZephyrProtocol;
@@ -35,7 +40,8 @@ public class MainActivity extends AppCompatActivity {
 
     // TAG for logging to console
     private static final String TAG = "MainActivity";
-
+    private long MAX_MINUTES = MILLISECONDS.convert(5,MINUTES);
+    private Date notificationDate;
     private BluetoothAdapter _btAdapter = null;
     private BTClient _bt;
     private NewConnectedListener _NConnListener;
@@ -205,6 +211,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onClickAlertButton(View v) {
+        GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com","heartrate");
+        try {
+
+            gMailSender.sendMail("Manual Notification",
+                    "Manual Notification",
+                    "coen390teamd@gmail.com",
+                    "coen390teamd@gmail.com");
+        } catch (Exception e) {
+            Log.e("SendMail", e.getMessage(), e);
+        }
         Toast toast = Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG);
         toast.show();
     }
@@ -339,6 +355,34 @@ public class MainActivity extends AppCompatActivity {
                     //System.out.println("Heart Rate Info is "+ HeartRatetext);
                     //Log.i(TAG, "Heart Rate: " + HeartRatetext);
                     if (tv != null)tv.setText("Heart Rate: " + HeartRatetext);
+
+                    float heartRateValue = Float.valueOf(HeartRatetext);
+                    SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+                    int age = prefs.getInt("age", 20);
+                    float maxHeartRate = (float)(208 - 0.7*age);
+                    if(heartRateValue > maxHeartRate){
+                        boolean sendEmail = false;
+                        if (notificationDate==null){
+                            long durationTime=Calendar.getInstance().getTimeInMillis();
+                            sendEmail = true;
+                        }else{
+                            long durationTime= Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
+                            if (durationTime > MAX_MINUTES){
+                                sendEmail=true;
+                            }
+                        }
+                        if (sendEmail){
+                            GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com","heartrate");
+                            try {
+                                gMailSender.sendMail("Notification Max HeartRate",
+                                    "Current HeartRate " + HeartRatetext,
+                                    "coen390teamd@gmail.com",
+                                    "coen390teamd@gmail.com");
+                            } catch (Exception e) {
+                            Log.e("SendMail", e.getMessage(), e);
+                            }
+                        }
+                    }
                     break;
 
                 default:
