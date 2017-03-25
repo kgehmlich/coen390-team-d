@@ -32,6 +32,13 @@ dependencies {
     compile 'com.android.support:design:25.2.0'
     testCompile 'junit:junit:4.12'
     compile files('libs/HxMBT.jar')
+
+// Email_Notifications
+    compile files('libs/activation.jar')
+    compile files('libs/additionnal.jar')
+    compile files('libs/mail.jar')
+
+// master
     compile 'com.android.support:multidex:1.0.1'
 
     compile project(':AWSMobileHelper')
