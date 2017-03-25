@@ -6,12 +6,64 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+//Graph related imports
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.widget.Toast;
+
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.DataPointInterface;
+import com.jjoe64.graphview.series.LineGraphSeries;
+import com.jjoe64.graphview.series.OnDataPointTapListener;
+import com.jjoe64.graphview.series.Series;
+
 public class SettingsActivity extends AppCompatActivity {
-	
+
+	private LineGraphSeries<DataPoint> series;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
+		//Create graph
+		GraphView graph = (GraphView) findViewById(R.id.graphSet);
+		series = new LineGraphSeries<DataPoint>();
+
+		//Set Graph Formatting
+		Paint paint = new Paint();
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(2);
+		paint.setColor(Color.RED);
+		series.setCustomPaint(paint);
+		series.setDrawDataPoints(true);
+		series.setDataPointsRadius(10);
+		//Method for displaying point information when a point is tapped
+		series.setOnDataPointTapListener(new OnDataPointTapListener() {
+			@Override
+			public void onTap(Series series, DataPointInterface dataPoint) {
+				Toast.makeText(getApplicationContext()," " + dataPoint,Toast.LENGTH_SHORT).show();
+			}
+		});
+
+		//graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
+		graph.getGridLabelRenderer().setVerticalAxisTitle("Heart Rate");
+
+		//need manual bounds for scrolling to function
+		// set manual Y bounds (Heart Rate)
+		graph.getViewport().setYAxisBoundsManual(true);
+		graph.getViewport().setMinY(0);
+		graph.getViewport().setMaxY(200);
+
+		// set manual X bounds (Time points)
+		graph.getViewport().setXAxisBoundsManual(true);
+		graph.getViewport().setMinX(0);
+		graph.getViewport().setMaxX(20);
+
+		graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
+		graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
+		//Creates graph using series
+		graph.addSeries(series);
 	}
 	
 	/**
@@ -39,6 +91,42 @@ public class SettingsActivity extends AppCompatActivity {
 				return super.onOptionsItemSelected(item);
 		}
 		return true;
+	}
+	//Function that allows the graph to be real-time updated
+	//TODO: May need to be altered or triggered for use with calibration function
+	@Override
+	protected void onResume(){
+		super.onResume();
+		//Thread in control of updating data series
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						//Calls function responsible for adding data to graph series
+						addEntry();
+					}
+				});
+				// sleep to slow down the add of entries.
+				try {
+					//Values are in milliseconds. This decides how often the graph is updated
+					//May need to change to suit our uses
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// manage error if need be...
+				}
+			}
+		}).start();
+	}
+
+	// add data to graph
+	private void addEntry() {
+		// here, we choose to display max 30 points on the graph and we scroll to end
+		//TODO: needs proper inputs from AWS here
+		double x = 1;
+		double y = 1;
+		series.appendData(new DataPoint(x, y), true, 30);
 	}
 	
 }

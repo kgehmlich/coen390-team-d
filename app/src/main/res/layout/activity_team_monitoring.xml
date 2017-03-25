@@ -10,15 +10,15 @@
 
     <ListView
         android:id="@+id/listView"
-        android:layout_width="0dp"
-        android:layout_height="301dp"
+        android:layout_width="365dp"
+        android:layout_height="191dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="2dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0.526"
+        app:layout_constraintHorizontal_bias="0.0"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"/>
 
@@ -42,62 +42,44 @@
         android:id="@+id/shortAvgBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="7dp"
         android:gravity="end"
         android:text="15sAvgBPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/BPMGraphImageView"
         app:layout_constraintTop_toBottomOf="@+id/instantBPMTextView"
-        app:layout_constraintHorizontal_bias="1.0"/>
+        android:layout_marginStart="8dp" />
 
     <TextView
         android:id="@+id/longAvgBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:gravity="end"
         android:text="1mAvgBPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/BPMGraphImageView"
-        app:layout_constraintTop_toBottomOf="@+id/shortAvgBPMTextView"
-        app:layout_constraintHorizontal_bias="0.333"/>
+        app:layout_constraintTop_toBottomOf="@+id/shortAvgBPMTextView" />
 
     <TextView
         android:id="@+id/instantBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="182dp"
         android:gravity="end"
         android:text="Instant BPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintRight_toLeftOf="@+id/BPMGraphImageView"
         app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="0dp" />
 
+    <com.jjoe64.graphview.GraphView
+        android:layout_width="0dp"
+        android:layout_height="170dp"
+        android:id="@+id/graphTeam"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="230dp"
+        android:layout_marginStart="0dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
-    <ImageView
-        android:id="@+id/BPMGraphImageView"
-        android:layout_width="200dp"
-        android:layout_height="150dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@android:drawable/alert_dark_frame"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
-        app:srcCompat="@drawable/bpm_graph"/>
 </android.support.constraint.ConstraintLayout>
