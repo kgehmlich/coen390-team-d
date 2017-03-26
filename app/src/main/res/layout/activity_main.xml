@@ -21,68 +21,46 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="8dp"
-        app:layout_constraintHorizontal_bias="0.0"/>
+        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
 
     <TextView
         android:id="@+id/shortAvgBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="13dp"
         android:gravity="end"
         android:text="15sAvgBPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/BPMGraphImageView"
         app:layout_constraintTop_toBottomOf="@+id/instantBPMTextView"
-        app:layout_constraintHorizontal_bias="1.0"/>
+        android:layout_marginStart="8dp" />
 
     <TextView
         android:id="@+id/longAvgBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:gravity="end"
         android:text="1mAvgBPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/BPMGraphImageView"
         app:layout_constraintTop_toBottomOf="@+id/shortAvgBPMTextView"
-        app:layout_constraintHorizontal_bias="0.333"/>
+        android:layout_marginStart="8dp" />
 
     <TextView
         android:id="@+id/instantBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="238dp"
         android:gravity="end"
         android:text="Instant BPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintRight_toLeftOf="@+id/BPMGraphImageView"
         app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="8dp" />
 
-
-    <ImageView
-        android:id="@+id/BPMGraphImageView"
-        android:layout_width="200dp"
-        android:layout_height="150dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@android:drawable/alert_dark_frame"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
-        app:srcCompat="@drawable/bpm_graph"/>
 
     <Button
         android:id="@+id/alertButton"
@@ -96,30 +74,36 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="8dp"
+        app:layout_constraintHorizontal_bias="0.854" />
 
-    <ListView
-        android:layout_width="368dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="0dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/alertButton"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/BPMGraphImageView"
-        app:layout_constraintVertical_bias="0.0"/>
+
 
     <Button
         android:id="@+id/ButtonConnect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connect"
-        app:layout_constraintRight_toLeftOf="@+id/alertButton"
-        android:layout_marginRight="24dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintHorizontal_bias="0.172"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="32dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintVertical_bias="1.0"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <com.jjoe64.graphview.GraphView
+        android:layout_width="0dp"
+        android:layout_height="220dp"
+        android:id="@+id/graph"
+        android:layout_marginStart="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="40dp" />
 
     <Button
         android:id="@+id/testButton"
