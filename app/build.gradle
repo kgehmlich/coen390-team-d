@@ -7,6 +7,7 @@ android {
         applicationId "com.coen390.team_d.heartratemonitor"
         minSdkVersion 21
         targetSdkVersion 25
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -32,4 +33,21 @@ dependencies {
     compile 'com.jjoe64:graphview:4.2.1'
     testCompile 'junit:junit:4.12'
     compile files('libs/HxMBT.jar')
+
+// Email_Notifications
+    compile files('libs/activation.jar')
+    compile files('libs/additionnal.jar')
+    compile files('libs/mail.jar')
+
+// master
+    compile 'com.android.support:multidex:1.0.1'
+
+    compile project(':AWSMobileHelper')
+
+
+    compile('com.amazonaws:aws-android-sdk-core:2.3.9')
+
+    // add the DynamoDB SDK and DynamoDB Object Mapper dependency
+    compile('com.amazonaws:aws-android-sdk-ddb:2.3.9')
+    compile('com.amazonaws:aws-android-sdk-ddb-mapper:2.3.9')
 }

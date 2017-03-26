@@ -1,10 +1,15 @@
 package com.coen390.team_d.heartratemonitor;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 //Graph related imports
 import android.graphics.Color;
@@ -26,6 +31,7 @@ public class SettingsActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
+
 		//Create graph
 		GraphView graph = (GraphView) findViewById(R.id.graphSet);
 		series = new LineGraphSeries<DataPoint>();
@@ -64,8 +70,33 @@ public class SettingsActivity extends AppCompatActivity {
 		graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
 		//Creates graph using series
 		graph.addSeries(series);
+
+		Button btnSaveSetting =(Button)findViewById(R.id.profileSaveButton);
+		btnSaveSetting.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				onClickSaveButton(v);
+			}
+		});
 	}
-	
+
+	private void onClickSaveButton(View v) {
+
+		//TODO Validate age and name edit text
+
+		SharedPreferences prefs =
+				getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
+
+		EditText ageText =(EditText)findViewById(R.id.ageEditText);
+		EditText nameText =(EditText)findViewById(R.id.nameEditText);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putInt("age", Integer.valueOf(ageText.getText().toString()));
+		editor.putString("name", nameText.getText().toString());
+		editor.commit();
+	}
+
 	/**
 	 * Adds toolbar menu to this activity
 	 */

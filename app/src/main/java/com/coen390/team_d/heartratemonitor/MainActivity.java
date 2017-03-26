@@ -1,6 +1,7 @@
 package com.coen390.team_d.heartratemonitor;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -35,8 +36,12 @@ import android.widget.TextView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Set;
+
+import static java.util.concurrent.TimeUnit.*;
 
 import zephyr.android.HxMBT.BTClient;
 import zephyr.android.HxMBT.ZephyrProtocol;
@@ -46,11 +51,16 @@ public class MainActivity extends AppCompatActivity {
 
     // TAG for logging to console
     private static final String TAG = "MainActivity";
-
+    private long MAX_MINUTES = MILLISECONDS.convert(5,MINUTES);
+    private Date notificationDate;
     private BluetoothAdapter _btAdapter = null;
     private BTClient _bt;
     private NewConnectedListener _NConnListener;
     ZephyrProtocol _protocol;
+
+    private ArrayList<Integer> heartRateRecentHistory;
+    private final static int AVG_HR_COUNT = 10;
+
     private final int HEART_RATE = 0x100;
     private final int INSTANT_SPEED = 0x101;
 
@@ -62,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        // Initialize heart rate history
+        heartRateRecentHistory = new ArrayList<>();
+
 
         Button alertButton = (Button) findViewById(R.id.alertButton);
         alertButton.setOnClickListener(new View.OnClickListener()
@@ -103,6 +118,31 @@ public class MainActivity extends AppCompatActivity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
+
+
+        ////////////////
+        // SIMULATION //
+        ////////////////
+
+        Button testBtn = (Button) findViewById(R.id.testButton);
+        if (testBtn != null) {
+            testBtn.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+
+                    for (int i = 300; i < 310; i++) {
+                        Message text1 = Newhandler.obtainMessage(HEART_RATE);
+                        Bundle b1 = new Bundle();
+                        b1.putString("HeartRate", String.valueOf(i));
+                        text1.setData(b1);
+                        Newhandler.sendMessage(text1);
+                    }
+                }
+
+            });
+        }
+        ////////////////////
+        // END SIMULATION //
+        ////////////////////
 
         //Obtaining the handle to act on the CONNECT button
         /*TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
@@ -256,6 +296,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onClickAlertButton(View v) {
+
+        // Send alert through AWS Dynamo DB
+        AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+        dbHelper.sendAlert(-1);
+
+        // Send email
+        GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com","heartrate");
+        try {
+
+            gMailSender.sendMail("Manual Notification",
+                    "Manual Notification",
+                    "coen390teamd@gmail.com",
+                    "coen390teamd@gmail.com");
+        } catch (Exception e) {
+            Log.e("SendMail", e.getMessage(), e);
+        }
         Toast toast = Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG);
         toast.show();
     }
@@ -386,10 +442,64 @@ public class MainActivity extends AppCompatActivity {
             {
                 case HEART_RATE:
                     String HeartRatetext = msg.getData().getString("HeartRate");
+                    int heartRateInt = Integer.parseInt(HeartRatetext);
                     tv = (TextView)findViewById(R.id.instantBPMTextView);
                     //System.out.println("Heart Rate Info is "+ HeartRatetext);
                     //Log.i(TAG, "Heart Rate: " + HeartRatetext);
                     if (tv != null)tv.setText("Heart Rate: " + HeartRatetext);
+
+
+                    // Store heart rate locally
+                    heartRateRecentHistory.add(heartRateInt);
+
+                    float heartRateValue = Float.valueOf(HeartRatetext);
+                    SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+                    int age = prefs.getInt("age", 20);
+                    float maxHeartRate = (float)(208 - 0.7*age);
+                    if (heartRateValue > maxHeartRate) {
+                        boolean sendEmail = false;
+                        if (notificationDate == null) {
+                            long durationTime = Calendar.getInstance().getTimeInMillis();
+                            sendEmail = true;
+                        } else {
+                            long durationTime = Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
+                            if (durationTime > MAX_MINUTES) {
+                                sendEmail = true;
+                            }
+                        }
+                        if (sendEmail) {
+
+                            // Send alert to AWS server
+                            AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+                            dbHelper.sendAlert(heartRateInt);
+
+                            /*GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com", "heartrate");
+                            try {
+                                gMailSender.sendMail("Notification Max HeartRate",
+                                        "Current HeartRate " + HeartRatetext,
+                                        "coen390teamd@gmail.com",
+                                        "coen390teamd@gmail.com");
+                            } catch (Exception e) {
+                                Log.e("SendMail", e.getMessage(), e);
+                            }*/
+                        } else {
+                            // Average and send to server once we have AVG_HR_COUNT heart rates logged
+                            if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
+                                int total = 0;
+                                for (int hr : heartRateRecentHistory) {
+                                    total += hr;
+                                }
+                                int avg = total / heartRateRecentHistory.size();
+
+                                // Send to server
+                                AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+                                dbHelper.updateHeartRate(avg);
+
+                                // Reset local hr storage
+                                heartRateRecentHistory.clear();
+                            }
+                        }
+                    }
                     break;
 
                 default:
