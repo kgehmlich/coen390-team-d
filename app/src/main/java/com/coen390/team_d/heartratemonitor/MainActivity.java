@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             testBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
 
-                    for (int i = 100; i < 110; i++) {
+                    for (int i = 300; i < 310; i++) {
                         Message text1 = Newhandler.obtainMessage(HEART_RATE);
                         Bundle b1 = new Bundle();
                         b1.putString("HeartRate", String.valueOf(i));
@@ -419,9 +419,11 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (sendEmail) {
 
-                            // TODO: Change this to send alert to AWS server
+                            // Send alert to AWS server
+                            AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+                            dbHelper.sendAlert(heartRateInt);
 
-                            GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com", "heartrate");
+                            /*GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com", "heartrate");
                             try {
                                 gMailSender.sendMail("Notification Max HeartRate",
                                         "Current HeartRate " + HeartRatetext,
@@ -429,21 +431,23 @@ public class MainActivity extends AppCompatActivity {
                                         "coen390teamd@gmail.com");
                             } catch (Exception e) {
                                 Log.e("SendMail", e.getMessage(), e);
+                            }*/
+                        } else {
+                            // Average and send to server once we have AVG_HR_COUNT heart rates logged
+                            if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
+                                int total = 0;
+                                for (int hr : heartRateRecentHistory) {
+                                    total += hr;
+                                }
+                                int avg = total / heartRateRecentHistory.size();
+
+                                // Send to server
+                                AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+                                dbHelper.updateHeartRate(avg);
+
+                                // Reset local hr storage
+                                heartRateRecentHistory.clear();
                             }
-                        }
-                    } else {
-                        // Average and send to server once we have AVG_HR_COUNT heart rates logged
-                        if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
-                            int total = 0;
-                            for (int hr : heartRateRecentHistory) { total += hr; }
-                            int avg = total / heartRateRecentHistory.size();
-
-                            // Send to server
-                            AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-                            dbHelper.updateHeartRate(avg);
-
-                            // Reset local hr storage
-                            heartRateRecentHistory.clear();
                         }
                     }
                     break;
