@@ -19,6 +19,8 @@ public class NewConnectedListener extends ConnectListenerImpl
     private final int HEART_RATE = 0x100;
     private final int INSTANT_SPEED = 0x101;
     private HRSpeedDistPacketInfo HRSpeedDistPacket = new HRSpeedDistPacketInfo();
+    
+    
     public NewConnectedListener(Handler handler, Handler _NewHandler) {
         super(handler, null);
         _OldHandler= handler;
