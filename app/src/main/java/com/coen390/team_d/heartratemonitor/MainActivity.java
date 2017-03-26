@@ -11,6 +11,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+//Graph related imports
+import android.graphics.Color;
+import android.graphics.Paint;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.DataPointInterface;
+import com.jjoe64.graphview.series.LineGraphSeries;
+import com.jjoe64.graphview.series.OnDataPointTapListener;
+import com.jjoe64.graphview.series.Series;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -26,6 +36,7 @@ import android.widget.TextView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
@@ -46,15 +57,26 @@ public class MainActivity extends AppCompatActivity {
     private BTClient _bt;
     private NewConnectedListener _NConnListener;
     ZephyrProtocol _protocol;
+
+    private ArrayList<Integer> heartRateRecentHistory;
+    private final static int AVG_HR_COUNT = 10;
+
     private final int HEART_RATE = 0x100;
     private final int INSTANT_SPEED = 0x101;
 
     private final static int REQUEST_ENABLE_BT = 1;
+    private LineGraphSeries<DataPoint> series;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        // Initialize heart rate history
+        heartRateRecentHistory = new ArrayList<>();
+
 
         Button alertButton = (Button) findViewById(R.id.alertButton);
         alertButton.setOnClickListener(new View.OnClickListener()
@@ -96,6 +118,31 @@ public class MainActivity extends AppCompatActivity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
+
+
+        ////////////////
+        // SIMULATION //
+        ////////////////
+
+        Button testBtn = (Button) findViewById(R.id.testButton);
+        if (testBtn != null) {
+            testBtn.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+
+                    for (int i = 300; i < 310; i++) {
+                        Message text1 = Newhandler.obtainMessage(HEART_RATE);
+                        Bundle b1 = new Bundle();
+                        b1.putString("HeartRate", String.valueOf(i));
+                        text1.setData(b1);
+                        Newhandler.sendMessage(text1);
+                    }
+                }
+
+            });
+        }
+        ////////////////////
+        // END SIMULATION //
+        ////////////////////
 
         //Obtaining the handle to act on the CONNECT button
         /*TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
@@ -208,9 +255,53 @@ public class MainActivity extends AppCompatActivity {
                 tv.setText(errorText);
             }
         }*/
+        //Create graph
+        GraphView graph = (GraphView) findViewById(R.id.graph);
+        series = new LineGraphSeries<DataPoint>();
+
+        //Set Graph Formatting
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(2);
+        paint.setColor(Color.RED);
+        series.setCustomPaint(paint);
+        series.setDrawDataPoints(true);
+        series.setDataPointsRadius(10);
+        //Method for displaying point information when a point is tapped
+        series.setOnDataPointTapListener(new OnDataPointTapListener() {
+            @Override
+            public void onTap(Series series, DataPointInterface dataPoint) {
+                Toast.makeText(getApplicationContext()," " + dataPoint,Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
+        graph.getGridLabelRenderer().setVerticalAxisTitle("Heart Rate");
+
+        //need manual bounds for scrolling to function
+        // set manual Y bounds (Heart Rate)
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(0);
+        graph.getViewport().setMaxY(200);
+
+        // set manual X bounds (Time points)
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(20);
+
+        graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
+        graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
+        //Creates graph using series
+        graph.addSeries(series);
     }
 
     private void onClickAlertButton(View v) {
+
+        // Send alert through AWS Dynamo DB
+        AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+        dbHelper.sendAlert(-1);
+
+        // Send email
         GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com","heartrate");
         try {
 
@@ -351,35 +442,61 @@ public class MainActivity extends AppCompatActivity {
             {
                 case HEART_RATE:
                     String HeartRatetext = msg.getData().getString("HeartRate");
+                    int heartRateInt = Integer.parseInt(HeartRatetext);
                     tv = (TextView)findViewById(R.id.instantBPMTextView);
                     //System.out.println("Heart Rate Info is "+ HeartRatetext);
                     //Log.i(TAG, "Heart Rate: " + HeartRatetext);
                     if (tv != null)tv.setText("Heart Rate: " + HeartRatetext);
 
+
+                    // Store heart rate locally
+                    heartRateRecentHistory.add(heartRateInt);
+
                     float heartRateValue = Float.valueOf(HeartRatetext);
                     SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
                     int age = prefs.getInt("age", 20);
                     float maxHeartRate = (float)(208 - 0.7*age);
-                    if(heartRateValue > maxHeartRate){
+                    if (heartRateValue > maxHeartRate) {
                         boolean sendEmail = false;
-                        if (notificationDate==null){
-                            long durationTime=Calendar.getInstance().getTimeInMillis();
+                        if (notificationDate == null) {
+                            long durationTime = Calendar.getInstance().getTimeInMillis();
                             sendEmail = true;
-                        }else{
-                            long durationTime= Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
-                            if (durationTime > MAX_MINUTES){
-                                sendEmail=true;
+                        } else {
+                            long durationTime = Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
+                            if (durationTime > MAX_MINUTES) {
+                                sendEmail = true;
                             }
                         }
-                        if (sendEmail){
-                            GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com","heartrate");
+                        if (sendEmail) {
+
+                            // Send alert to AWS server
+                            AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+                            dbHelper.sendAlert(heartRateInt);
+
+                            /*GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com", "heartrate");
                             try {
                                 gMailSender.sendMail("Notification Max HeartRate",
-                                    "Current HeartRate " + HeartRatetext,
-                                    "coen390teamd@gmail.com",
-                                    "coen390teamd@gmail.com");
+                                        "Current HeartRate " + HeartRatetext,
+                                        "coen390teamd@gmail.com",
+                                        "coen390teamd@gmail.com");
                             } catch (Exception e) {
-                            Log.e("SendMail", e.getMessage(), e);
+                                Log.e("SendMail", e.getMessage(), e);
+                            }*/
+                        } else {
+                            // Average and send to server once we have AVG_HR_COUNT heart rates logged
+                            if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
+                                int total = 0;
+                                for (int hr : heartRateRecentHistory) {
+                                    total += hr;
+                                }
+                                int avg = total / heartRateRecentHistory.size();
+
+                                // Send to server
+                                AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+                                dbHelper.updateHeartRate(avg);
+
+                                // Reset local hr storage
+                                heartRateRecentHistory.clear();
                             }
                         }
                     }
@@ -391,4 +508,39 @@ public class MainActivity extends AppCompatActivity {
         }
 
     };
+    //Function that allows the graph to be real-time updated
+    @Override
+    protected void onResume(){
+        super.onResume();
+        //Thread in control of updating data series
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Calls function responsible for adding data to graph series
+                            addEntry();
+                        }
+                    });
+                    // sleep to slow down the add of entries.
+                    try {
+                        //Values are in milliseconds. This decides how often the graph is updated
+                        //May need to change to suit our uses
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        // manage error if need be...
+                    }
+            }
+        }).start();
+    }
+
+    // add data to graph
+    private void addEntry() {
+        // here, we choose to display max 30 points on the graph and we scroll to end
+        //TODO: needs proper inputs from AWS here
+        double x = 1;
+        double y = 1;
+        series.appendData(new DataPoint(x, y), true, 30);
+    }
 }

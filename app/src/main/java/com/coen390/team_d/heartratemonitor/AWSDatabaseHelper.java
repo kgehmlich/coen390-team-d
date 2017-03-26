@@ -1,5 +1,7 @@
 package com.coen390.team_d.heartratemonitor;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.amazonaws.AmazonClientException;
@@ -21,15 +23,17 @@ public class AWSDatabaseHelper {
     // Log tag
     private final static String TAG = "AWSDatabaseHelper";
 
-    private String tempUserId = "tempUserId";
+    private Context _context;
+    private String noNameString = "NO NAME SET";
 
     private HeartRatesDO _item;
 
     /**
      * Constructor
      */
-    public AWSDatabaseHelper() {
+    public AWSDatabaseHelper(Context context) {
         _item = new HeartRatesDO();
+        _context = context;
 
     }
 
@@ -68,8 +72,9 @@ public class AWSDatabaseHelper {
             _item.setHeartRate(-1d);
         }
 
-        // TODO: replace the following line with a call to get the userID from SharedPrefs (once they are implemented)
-        _item.setUserId(tempUserId);
+        // Get the userID from SharedPrefs
+        SharedPreferences prefs = _context.getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
+        _item.setUserId(prefs.getString("name", noNameString));
 
         Calendar calendar = Calendar.getInstance();
         java.util.Date now = calendar.getTime();
@@ -81,12 +86,12 @@ public class AWSDatabaseHelper {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                AmazonClientException lastException = null;
+                //AmazonClientException lastException = null;
                 try {
                     dynamoDBMapper.save(_item);
                 } catch (final AmazonClientException ex) {
                     Log.e(TAG, "Failed saving _item : " + ex.getMessage(), ex);
-                    lastException = ex;
+                    //lastException = ex;
                 }
             }
         };

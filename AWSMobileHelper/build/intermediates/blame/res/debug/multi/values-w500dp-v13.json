@@ -1,6 +1,6 @@
 [
     {
-        "outputFile": "C:\\Users\\kgehm\\AndroidStudioProjects\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-w500dp-v13\\values-w500dp-v13.xml",
+        "outputFile": "C:\\Users\\Kyle\\AndroidWorkspace\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-w500dp-v13\\values-w500dp-v13.xml",
         "map": [
             {
                 "to": {
@@ -11,7 +11,7 @@
                     "endOffset": 105
                 },
                 "from": {
-                    "file": "C:\\Users\\kgehm\\.android\\build-cache\\6d62290d5ac643843ca5e27f1f3ad3d1cf2b4355\\output\\res\\values-w500dp\\values-w500dp.xml",
+                    "file": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\values-w500dp\\values-w500dp.xml",
                     "position": {
                         "startLine": 4,
                         "startColumn": 4,
