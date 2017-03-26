@@ -1,0 +1,20 @@
+@startuml
+actor User
+entity Main_activity
+entity Team_Activity
+participant FetchHeartRates
+participant AWSDatabaseHelper
+database AWSDatabase
+
+... Team Monitoring Sequence ...
+
+Main_activity -> Team_Activity : GoToTeamActivity
+deactivate Main_activity
+activate Team_Activity
+group Updates at 1S/10s
+activate AWSDatabaseHelper
+deactivate AWSDatabaseHelper
+AWSDatabaseHelper -> Team_Activity : ArrayList<HeartRatesDO>
+end
+... Monitoring ...
+@enduml
