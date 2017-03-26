@@ -1,0 +1,50 @@
+@startuml
+actor User
+entity "Heart Rate Sensor"
+entity Main_activity
+participant Newhandler
+participant NewConnectedListener
+database AWSDatabaseHelper
+
+... Self Monitoring Sequence ...
+
+User --> Main_activity : Open App
+ref over User,Main_activity,Newhandler
+Ref Initialization
+Sequence Diagram
+end ref
+
+activate Main_activity
+activate Newhandler
+User -> Main_activity : Connect to Sensor
+Main_activity --> "Heart Rate Sensor" : Connect()
+activate "Heart Rate Sensor"
+"Heart Rate Sensor" -> Main_activity
+Main_activity --> NewConnectedListener: NewConnectedListener()
+activate NewConnectedListener
+NewConnectedListener -> Main_activity
+"Heart Rate Sensor" -> NewConnectedListener: ReceivedPacket()
+
+group Repeats at 1S/s
+NewConnectedListener->> Newhandler : int HeartRate
+Newhandler -> Newhandler: handleMessage()
+activate Newhandler #FFBBBB
+Newhandler ->> Main_activity : int HeartRate
+Newhandler ->> Main_activity : float average HR
+Newhandler ->> Main_activity : Graph Update
+Newhandler -> Newhandler:  if (heartRateValue > maxHeartRate)
+activate Newhandler #FF8888
+Newhandler -> AWSDatabaseHelper: Send Alert
+deactivate Newhandler
+
+group Repeats at 1S/10s
+Newhandler -> Newhandler:  if (HRRecentHist > AVG_HR_COUNT)
+activate Newhandler #FF8888
+Newhandler -> AWSDatabaseHelper: Send Average HR
+deactivate Newhandler
+end
+deactivate Newhandler
+NewConnectedListener->> Newhandler : double InstantSpeed
+end
+... Monitoring  ...
+@enduml
