@@ -1,11 +1,11 @@
 [
     {
-        "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\debug\\layout\\abc_screen_toolbar.xml",
-        "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\layout\\abc_screen_toolbar.xml"
-    },
-    {
         "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\debug\\layout\\abc_expanded_menu_layout.xml",
         "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\layout\\abc_expanded_menu_layout.xml"
+    },
+    {
+        "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\debug\\layout\\abc_screen_toolbar.xml",
+        "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\layout\\abc_screen_toolbar.xml"
     },
     {
         "merged": "C:\\Users\\Kyle\\AndroidWorkspace\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\debug\\layout\\abc_screen_content_include.xml",

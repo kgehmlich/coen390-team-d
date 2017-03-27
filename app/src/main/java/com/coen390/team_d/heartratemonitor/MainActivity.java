@@ -39,6 +39,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 
 import static java.util.concurrent.TimeUnit.*;
@@ -66,6 +68,11 @@ public class MainActivity extends AppCompatActivity {
 
     private final static int REQUEST_ENABLE_BT = 1;
     private LineGraphSeries<DataPoint> series;
+    //Fields for HRAverages()
+    private Queue<Integer> HRTenSecAvgData = new LinkedList();
+    private Queue<Integer> HROneMinAvgData = new LinkedList();
+    private int TenSecTotal = 0;
+    private int OneMinTotal = 0;
 
 
     @Override
@@ -447,6 +454,8 @@ public class MainActivity extends AppCompatActivity {
                     //System.out.println("Heart Rate Info is "+ HeartRatetext);
                     //Log.i(TAG, "Heart Rate: " + HeartRatetext);
                     if (tv != null)tv.setText("Heart Rate: " + HeartRatetext);
+                    
+                    HRAverages(heartRateInt);
 
 
                     // Store heart rate locally
@@ -533,6 +542,42 @@ public class MainActivity extends AppCompatActivity {
                     }
             }
         }).start();
+    }
+    
+    private void HRAverages(int HR){
+        TextView tv;
+        float TenSecAvg;
+        float OneMinAvg;
+        TenSecTotal += HR;
+        OneMinTotal += HR;
+        HRTenSecAvgData.add(HR);
+        HROneMinAvgData.add(HR);
+    
+        if (HROneMinAvgData.size() > 60){
+            OneMinTotal -= HROneMinAvgData.poll();
+            OneMinAvg = OneMinTotal/60;
+        }
+        else {
+            OneMinAvg = OneMinTotal/HROneMinAvgData.size();
+        }
+    
+        if (HRTenSecAvgData.size() > 10){
+            TenSecTotal -= HRTenSecAvgData.poll();
+            TenSecAvg = TenSecTotal/10;
+        }
+        else {
+            TenSecAvg = TenSecTotal/HRTenSecAvgData.size();
+        }
+        tv = (TextView)findViewById(R.id.shortAvgBPMTextView);
+        //System.out.println("Heart Rate Info is "+ HeartRatetext);
+        //Log.i(TAG, "Heart Rate: " + HeartRatetext);
+        if (tv != null)tv.setText("10Sec Avg HR: " + TenSecAvg);
+    
+        tv = (TextView)findViewById(R.id.longAvgBPMTextView);
+        //System.out.println("Heart Rate Info is "+ HeartRatetext);
+        //Log.i(TAG, "Heart Rate: " + HeartRatetext);
+        if (tv != null)tv.setText("10Sec Avg HR: " + OneMinAvg);
+        
     }
 
     // add data to graph

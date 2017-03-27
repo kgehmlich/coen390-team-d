@@ -47,7 +47,8 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_team_monitoring);
-
+		
+		/*
 		//Create graph
 		GraphView graph = (GraphView) findViewById(R.id.graph);
 		series = new LineGraphSeries<DataPoint>();
@@ -86,6 +87,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
 		//Creates graph using series
 		graph.addSeries(series);
+		*/
 
         updateHandler = new Handler();
         updateHandler.post(updateHeartRates);
@@ -130,7 +132,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		startActivity(intent);
 	}
   
-  
+  /*
 	// Function that allows the graph to be real-time updated
 	@Override
 	protected void onResume(){
@@ -156,9 +158,10 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 				}
 			}
 		}).start();
-	}
+	}*/
 	//TODO: Might be possible to create some kind of multiplexer function to switch between user data
 	//TODO: Could also display multiple users at once
+	/*
 	// add data to graph
 	private void addEntry() {
 		// here, we choose to display max 30 points on the graph and we scroll to end
@@ -166,7 +169,8 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		double x = 1;
 		double y = 1;
 		series.appendData(new DataPoint(x, y), true, 30);
-	}
+		
+	}*/
 
 
     // Class to asynchronously update the UI with data from server
