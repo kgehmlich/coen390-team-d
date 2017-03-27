@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
 	private int TenSecTotal = 0;
 	private int OneMinTotal = 0;
+	private int MaxBPM;
 	
 	
 	@Override
@@ -570,19 +571,25 @@ public class MainActivity extends AppCompatActivity {
 			TenSecAvg = TenSecTotal/HRTenSecAvgData.size();
 		}
 		tv = (TextView)findViewById(R.id.shortAvgBPMTextView);
-		//System.out.println("Heart Rate Info is "+ HeartRatetext);
-		//Log.i(TAG, "Heart Rate: " + HeartRatetext);
-		if (tv != null)tv.setText("10Sec Avg HR: " + TenSecAvg);
+		if (tv != null)tv.setText("10s. Avg: " + TenSecAvg);
 		
 		tv = (TextView)findViewById(R.id.longAvgBPMTextView);
-		//System.out.println("Heart Rate Info is "+ HeartRatetext);
-		//Log.i(TAG, "Heart Rate: " + HeartRatetext);
-		if (tv != null)tv.setText("1Min Avg HR: " + OneMinAvg);
+		if (tv != null)tv.setText("1Min Avg: " + OneMinAvg);
 		
 	}
 	
-	private void HRZones(){
+	private void HRZones(int HR){
+		TextView tv;
+		int HRZone;
 		
+		if (HR > MaxBPM)
+			MaxBPM = HR;
+		HRZone = HR*100/MaxBPM;
+		
+		tv = (TextView)findViewById(R.id.HRPercent);
+		if (tv != null)tv.setText("%HR: " + HRZone + "%");
+		tv = (TextView)findViewById(R.id.HRMax);
+		if (tv != null)tv.setText("Max HR: " + MaxBPM);
 	}
 	
 	// add data to graph

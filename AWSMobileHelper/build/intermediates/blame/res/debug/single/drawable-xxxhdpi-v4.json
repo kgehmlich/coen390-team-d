@@ -1,11 +1,11 @@
 [
     {
-        "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\debug\\drawable-xxxhdpi-v4\\abc_btn_switch_to_on_mtrl_00012.9.png",
-        "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\drawable-xxxhdpi\\abc_btn_switch_to_on_mtrl_00012.9.png"
-    },
-    {
         "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\debug\\drawable-xxxhdpi-v4\\abc_btn_radio_to_on_mtrl_015.png",
         "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\drawable-xxxhdpi\\abc_btn_radio_to_on_mtrl_015.png"
+    },
+    {
+        "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\debug\\drawable-xxxhdpi-v4\\abc_btn_switch_to_on_mtrl_00012.9.png",
+        "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\drawable-xxxhdpi\\abc_btn_switch_to_on_mtrl_00012.9.png"
     },
     {
         "merged": "C:\\Users\\Kyle\\AndroidWorkspace\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\debug\\drawable-xxxhdpi-v4\\abc_btn_radio_to_on_mtrl_015.png",

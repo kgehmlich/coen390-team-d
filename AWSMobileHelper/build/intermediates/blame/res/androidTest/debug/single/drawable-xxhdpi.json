@@ -8,24 +8,24 @@
         "source": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\drawable-xxhdpi\\abc_list_selector_disabled_holo_light.9.png"
     },
     {
-        "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi\\abc_ab_share_pack_mtrl_alpha.9.png",
-        "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\drawable-xxhdpi\\abc_ab_share_pack_mtrl_alpha.9.png"
-    },
-    {
         "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi\\abc_ic_ab_back_mtrl_am_alpha.png",
         "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\drawable-xxhdpi\\abc_ic_ab_back_mtrl_am_alpha.png"
+    },
+    {
+        "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi\\abc_ab_share_pack_mtrl_alpha.9.png",
+        "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\drawable-xxhdpi\\abc_ab_share_pack_mtrl_alpha.9.png"
     },
     {
         "merged": "C:\\Users\\Kyle\\AndroidWorkspace\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi\\abc_btn_rating_star_on_mtrl_alpha.png",
         "source": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\drawable-xxhdpi\\abc_btn_rating_star_on_mtrl_alpha.png"
     },
     {
-        "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi\\abc_scrubber_control_off_mtrl_alpha.png",
-        "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\drawable-xxhdpi\\abc_scrubber_control_off_mtrl_alpha.png"
-    },
-    {
         "merged": "C:\\Users\\Kyle\\AndroidWorkspace\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi\\abc_btn_check_to_on_mtrl_000.png",
         "source": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\drawable-xxhdpi\\abc_btn_check_to_on_mtrl_000.png"
+    },
+    {
+        "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi\\abc_scrubber_control_off_mtrl_alpha.png",
+        "source": "C:\\Users\\Mostly.Generic\\.android\\build-cache\\65f24de96c946b0b566e95aa9ab9e54ba7a6be68\\output\\res\\drawable-xxhdpi\\abc_scrubber_control_off_mtrl_alpha.png"
     },
     {
         "merged": "C:\\Android\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xxhdpi\\abc_btn_radio_to_on_mtrl_000.png",

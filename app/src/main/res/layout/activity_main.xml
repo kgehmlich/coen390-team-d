@@ -69,7 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:gravity="start"
-        android:text="15sAvgBPM"
+        android:text="10s. Avg: "
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instantBPMTextView"
@@ -81,7 +81,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:gravity="start"
-        android:text="1mAvgBPM"
+        android:text="1Min Avg: "
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/shortAvgBPMTextView"
@@ -99,6 +99,31 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"/>
+
+    <TextView
+        android:id="@+id/HRMax"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="start"
+        android:text="Max HR: "
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/graph"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="0dp"/>
+    <TextView
+        android:id="@+id/HRPercent"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="start"
+        android:text="%HR: "
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/HRMax"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="0dp"/>
 
     <View
         android:layout_width="400dp"
