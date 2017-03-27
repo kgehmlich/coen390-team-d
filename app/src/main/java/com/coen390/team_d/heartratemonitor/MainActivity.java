@@ -576,7 +576,7 @@ public class MainActivity extends AppCompatActivity {
         tv = (TextView)findViewById(R.id.longAvgBPMTextView);
         //System.out.println("Heart Rate Info is "+ HeartRatetext);
         //Log.i(TAG, "Heart Rate: " + HeartRatetext);
-        if (tv != null)tv.setText("10Sec Avg HR: " + OneMinAvg);
+        if (tv != null)tv.setText("1Min Avg HR: " + OneMinAvg);
         
     }
 
