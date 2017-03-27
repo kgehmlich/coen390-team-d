@@ -82,6 +82,8 @@ package com.coen390.team_d.heartratemonitor. {
 			-final int HEART_RATE
 			-final int INSTANT_SPEED
 			-final static int REQUEST_ENABLE_BT
+			-Queue<HR> HRTenSecAvgData
+			-Queue<HR> HROneMinAvgData
 
 			__ Methods __
 			+onCreateOptionsMenu()
@@ -92,6 +94,7 @@ package com.coen390.team_d.heartratemonitor. {
 			-goToTeamMonitoringActivity()
 			-goToSettingsActivity()
 			-btAlertAndExit()
+			-HRAverages()
 		}
 
 		class TeamMonitoringActivity {

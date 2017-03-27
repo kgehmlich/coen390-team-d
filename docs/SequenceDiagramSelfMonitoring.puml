@@ -30,7 +30,7 @@ NewConnectedListener->> Newhandler : int HeartRate
 Newhandler -> Newhandler: handleMessage()
 activate Newhandler #FFBBBB
 Newhandler ->> Main_activity : int HeartRate
-Newhandler ->> Main_activity : float average HR
+Newhandler ->> Main_activity : float average HRs
 Newhandler ->> Main_activity : Graph Update
 Newhandler -> Newhandler:  if (heartRateValue > maxHeartRate)
 activate Newhandler #FF8888
