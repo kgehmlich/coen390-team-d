@@ -8,13 +8,17 @@ database AWSDatabase
 
 ... Team Monitoring Sequence ...
 
+User --> Main_activity : Open App
+activate Main_activity
 Main_activity -> Team_Activity : GoToTeamActivity
 deactivate Main_activity
 activate Team_Activity
 group Updates at 1S/10s
+FetchHeartRates -> AWSDatabaseHelper : Query HeartRates
 activate AWSDatabaseHelper
+AWSDatabaseHelper -> Team_Activity : ArrayList<HeartRatesDO> hrList
 deactivate AWSDatabaseHelper
-AWSDatabaseHelper -> Team_Activity : ArrayList<HeartRatesDO>
+Team_Activity -> Team_Activity : Update Listview
 end
 ... Monitoring ...
 @enduml
