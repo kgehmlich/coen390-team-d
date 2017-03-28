@@ -52,6 +52,7 @@ import zephyr.android.HxMBT.ZephyrProtocol;
 public class MainActivity extends AppCompatActivity {
 	
 	// TAG for logging to console
+	private boolean RemoteMonitoringFlag = true;
 	private static final String TAG = "MainActivity";
 	private long MAX_MINUTES = MILLISECONDS.convert(5,MINUTES);
 	private Date notificationDate;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 	
 	private final static int REQUEST_ENABLE_BT = 1;
 	private LineGraphSeries<DataPoint> series;
+	
 	//Fields for HRAverages()
 	private Queue<Integer> HRTenSecAvgData = new LinkedList();
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
@@ -343,7 +345,15 @@ public class MainActivity extends AppCompatActivity {
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
 		switch (item.getItemId()) {
 			case R.id.toggleMonitoring:
-				//TODO toggleMonitoring() function
+				//TODO toggleMonitoring() function with visual feedback
+				if(RemoteMonitoringFlag) {
+					RemoteMonitoringFlag = false;
+					Toast.makeText(getApplicationContext(),"Monitoring is OFF" ,Toast.LENGTH_SHORT).show();
+				}
+				else {
+					RemoteMonitoringFlag = true;
+					Toast.makeText(getApplicationContext(),"Monitoring is ON" ,Toast.LENGTH_SHORT).show();
+				}
 				break;
 			case R.id.teamMonitoring:
 				goToTeamMonitoringActivity();
@@ -456,34 +466,36 @@ public class MainActivity extends AppCompatActivity {
 					//Log.i(TAG, "Heart Rate: " + HeartRatetext);
 					if (tv != null)tv.setText("Heart Rate: " + HeartRatetext);
 					
+					//HR Averages calculation and UI Updates
 					HRAverages(heartRateInt);
+					//HR Zones Calculation and UI updates
 					HRZones(heartRateInt);
 					
-					
-					// Store heart rate locally
-					heartRateRecentHistory.add(heartRateInt);
-					
-					float heartRateValue = Float.valueOf(HeartRatetext);
-					SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-					int age = prefs.getInt("age", 20);
-					float maxHeartRate = (float)(208 - 0.7*age);
-					if (heartRateValue > maxHeartRate) {
-						boolean sendEmail = false;
-						if (notificationDate == null) {
-							long durationTime = Calendar.getInstance().getTimeInMillis();
-							sendEmail = true;
-						} else {
-							long durationTime = Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
-							if (durationTime > MAX_MINUTES) {
+					if (RemoteMonitoringFlag){
+						// Store heart rate locally
+						heartRateRecentHistory.add(heartRateInt);
+						
+						float heartRateValue = Float.valueOf(HeartRatetext);
+						SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+						int age = prefs.getInt("age", 20);
+						float maxHeartRate = (float)(208 - 0.7*age);
+						if (heartRateValue > maxHeartRate) {
+							boolean sendEmail = false;
+							if (notificationDate == null) {
+								long durationTime = Calendar.getInstance().getTimeInMillis();
 								sendEmail = true;
+							} else {
+								long durationTime = Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
+								if (durationTime > MAX_MINUTES) {
+									sendEmail = true;
+								}
 							}
-						}
-						if (sendEmail) {
-							
-							// Send alert to AWS server
-							AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-							dbHelper.sendAlert(heartRateInt);
-
+							if (sendEmail) {
+								
+								// Send alert to AWS server
+								AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+								dbHelper.sendAlert(heartRateInt);
+								
 							/*GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com", "heartrate");
 							try {
 								gMailSender.sendMail("Notification Max HeartRate",
@@ -493,32 +505,32 @@ public class MainActivity extends AppCompatActivity {
 							} catch (Exception e) {
 								Log.e("SendMail", e.getMessage(), e);
 							}*/
-						} else {
-							// Average and send to server once we have AVG_HR_COUNT heart rates logged
-							if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
-								int total = 0;
-								for (int hr : heartRateRecentHistory) {
-									total += hr;
+							} else {
+								// Average and send to server once we have AVG_HR_COUNT heart rates logged
+								if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
+									int total = 0;
+									for (int hr : heartRateRecentHistory) {
+										total += hr;
+									}
+									int avg = total / heartRateRecentHistory.size();
+									
+									// Send to server
+									AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+									dbHelper.updateHeartRate(avg);
+									
+									// Reset local hr storage
+									heartRateRecentHistory.clear();
 								}
-								int avg = total / heartRateRecentHistory.size();
-								
-								// Send to server
-								AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-								dbHelper.updateHeartRate(avg);
-								
-								// Reset local hr storage
-								heartRateRecentHistory.clear();
 							}
 						}
 					}
 					break;
-				
 				default:
 					break;
 			}
 		}
-		
 	};
+	
 	//Function that allows the graph to be real-time updated
 	@Override
 	protected void onResume(){
