@@ -24,7 +24,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <View
-        android:layout_width="400dp"
+        android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/colorDivider"
         app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
@@ -34,7 +34,7 @@
     <ListView
         android:id="@+id/listView"
         android:layout_width="365dp"
-        android:layout_height="180dp"
+        android:layout_height="0dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -42,10 +42,12 @@
         android:layout_marginTop="2dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/usernameTextview"/>
+        app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/graphTeam"/>
 
     <View
-        android:layout_width="400dp"
+        android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/colorDivider"
         app:layout_constraintTop_toBottomOf="@+id/listView"
@@ -56,57 +58,59 @@
         android:layout_width="0dp"
         android:layout_height="170dp"
         android:id="@+id/graphTeam"
-        android:layout_marginTop="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listView"/>
+        android:layout_marginLeft="0dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/instantBPMTextView"/>
 
     <View
-        android:layout_width="400dp"
+        android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/colorDivider"
         app:layout_constraintTop_toBottomOf="@+id/graphTeam"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="4dp"/>
+        android:layout_marginTop="4dp"
+        android:id="@+id/view"/>
 
     <TextView
         android:id="@+id/instantBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:gravity="end"
         android:text="Instant BPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintTop_toBottomOf="@+id/graphTeam"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        />
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/shortAvgBPMTextView"/>
 
 
     <TextView
         android:id="@+id/shortAvgBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:gravity="end"
-        android:text="15sAvgBPM"
+        android:text="10sAvgBPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/instantBPMTextView"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"/>
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/longAvgBPMTextView"/>
 
     <TextView
         android:id="@+id/longAvgBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:gravity="end"
         android:text="1mAvgBPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/shortAvgBPMTextView"
-        android:layout_marginStart="8dp"/>
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"/>
 
 
 </android.support.constraint.ConstraintLayout>
