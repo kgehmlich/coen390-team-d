@@ -7,21 +7,6 @@
     android:layout_height="match_parent"
     tools:context="com.coen390.team_d.heartratemonitor.TeamMonitoringActivity">
 
-
-    <ListView
-        android:id="@+id/listView"
-        android:layout_width="365dp"
-        android:layout_height="191dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="2dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"/>
-
     <TextView
         android:id="@+id/usernameTextview"
         android:layout_width="0dp"
@@ -29,57 +14,99 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        android:text="Remote User Name"
+        android:text="Remote Users"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listView"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="8dp"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-    <TextView
-        android:id="@+id/shortAvgBPMTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="7dp"
-        android:gravity="end"
-        android:text="15sAvgBPM"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/instantBPMTextView"
-        android:layout_marginStart="8dp" />
-
-    <TextView
-        android:id="@+id/longAvgBPMTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="end"
-        android:text="1mAvgBPM"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/shortAvgBPMTextView" />
-
-    <TextView
-        android:id="@+id/instantBPMTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="182dp"
-        android:gravity="end"
-        android:text="Instant BPM"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+    <View
+        android:layout_width="400dp"
+        android:layout_height="1dp"
+        android:background="@color/colorDivider"
         app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="0dp" />
+        android:layout_marginTop="4dp"/>
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="365dp"
+        android:layout_height="180dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/usernameTextview"/>
+
+    <View
+        android:layout_width="400dp"
+        android:layout_height="1dp"
+        android:background="@color/colorDivider"
+        app:layout_constraintTop_toBottomOf="@+id/listView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="4dp"/>
 
     <com.jjoe64.graphview.GraphView
         android:layout_width="0dp"
         android:layout_height="170dp"
         android:id="@+id/graphTeam"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="230dp"
-        android:layout_marginStart="0dp"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        android:layout_marginTop="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/listView"/>
+
+    <View
+        android:layout_width="400dp"
+        android:layout_height="1dp"
+        android:background="@color/colorDivider"
+        app:layout_constraintTop_toBottomOf="@+id/graphTeam"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/instantBPMTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="end"
+        android:text="Instant BPM"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintTop_toBottomOf="@+id/graphTeam"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        />
+
+
+    <TextView
+        android:id="@+id/shortAvgBPMTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="end"
+        android:text="15sAvgBPM"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/instantBPMTextView"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"/>
+
+    <TextView
+        android:id="@+id/longAvgBPMTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="end"
+        android:text="1mAvgBPM"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shortAvgBPMTextView"
+        android:layout_marginStart="8dp"/>
+
 
 </android.support.constraint.ConstraintLayout>

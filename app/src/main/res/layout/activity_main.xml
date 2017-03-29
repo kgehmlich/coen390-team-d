@@ -8,7 +8,6 @@
     android:layout_height="match_parent"
     tools:context="com.coen390.team_d.heartratemonitor.MainActivity">
 
-
     <TextView
         android:id="@+id/usernameTextview"
         android:layout_width="0dp"
@@ -26,16 +25,55 @@
         android:layout_marginEnd="8dp" />
 
     <TextView
+        android:id="@+id/userAge"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:gravity="end"
+        android:text="Age"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
+        android:layout_marginLeft="16dp"/>
+
+    <View
+        android:layout_width="400dp"
+        android:layout_height="1dp"
+        android:background="@color/colorDivider"
+        app:layout_constraintTop_toBottomOf="@+id/userAge"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <com.jjoe64.graphview.GraphView
+        android:layout_width="0dp"
+        android:layout_height="220dp"
+        android:id="@+id/graph"
+        android:layout_marginStart="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/userAge"/>
+
+    <View
+        android:layout_width="400dp"
+        android:layout_height="1dp"
+        android:background="@color/colorDivider"
+        app:layout_constraintTop_toBottomOf="@+id/graph"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
         android:id="@+id/shortAvgBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="16dp"
         android:gravity="end"
         android:text="15sAvgBPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instantBPMTextView"
-        android:layout_marginStart="8dp" />
+        android:layout_marginStart="16dp" />
 
     <TextView
         android:id="@+id/longAvgBPMTextView"
@@ -47,36 +85,50 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/shortAvgBPMTextView"
-        android:layout_marginStart="8dp" />
+        android:layout_marginStart="16dp" />
 
     <TextView
         android:id="@+id/instantBPMTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="238dp"
+        android:layout_marginTop="16dp"
         android:gravity="end"
         android:text="Instant BPM"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintTop_toBottomOf="@+id/usernameTextview"
+        app:layout_constraintTop_toBottomOf="@+id/graph"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="8dp" />
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"/>
+
+    <View
+        android:layout_width="400dp"
+        android:layout_height="1dp"
+        android:background="@color/colorDivider"
+        app:layout_constraintTop_toBottomOf="@+id/longAvgBPMTextView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="8dp"
+        android:id="@+id/view"
+        android:layout_marginStart="0dp"/>
 
 
     <Button
         android:id="@+id/alertButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:background="@color/colorAccent"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
         android:text="Manual Alert"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintHorizontal_bias="0.854" />
-
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/view"/>
 
 
     <Button
@@ -84,35 +136,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Connect"
-        android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent"
+        android:background="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintHorizontal_bias="0.172"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="32dp"
+        app:layout_constraintRight_toLeftOf="@+id/alertButton"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintVertical_bias="1.0"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp" />
-
-    <com.jjoe64.graphview.GraphView
-        android:layout_width="0dp"
-        android:layout_height="220dp"
-        android:id="@+id/graph"
-        android:layout_marginStart="0dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="40dp" />
+        app:layout_constraintTop_toBottomOf="@+id/view"/>
 
     <Button
         android:id="@+id/testButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TEST HR"
-        app:layout_constraintLeft_toRightOf="@+id/alertButton"
-        android:layout_marginLeft="18dp"
+        android:background="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/alertButton"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/view"/>
 
 </android.support.constraint.ConstraintLayout>
