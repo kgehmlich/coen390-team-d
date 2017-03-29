@@ -592,16 +592,44 @@ public class MainActivity extends AppCompatActivity {
 	
 	private void HRZones(int HR){
 		TextView tv;
-		int HRZone;
+		int MaxHRPercent;
+		String HRzone = new String();
+		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+		int age = prefs.getInt("age", 20);
+		MaxBPM = 220-age;
 		
 		if (HR > MaxBPM)
 			MaxBPM = HR;
-		HRZone = HR*100/MaxBPM;
+		MaxHRPercent = HR*100/MaxBPM;
 		
-		tv = (TextView)findViewById(R.id.HRPercent);
-		if (tv != null)tv.setText("%HR: " + HRZone + "%");
+		switch (MaxHRPercent/10){
+			case 9:
+				HRzone = "VO2 Max";
+				break;
+			case 8:
+				HRzone = "Anaerobic";
+				break;
+			case 7:
+				HRzone = "Aerobic";
+				break;
+			case 6:
+				HRzone = "W.Control";
+				break;
+			case 5:
+				HRzone = "Moderate";
+				break;
+			default:
+				break;
+		}
+		
 		tv = (TextView)findViewById(R.id.HRMax);
 		if (tv != null)tv.setText("Max HR: " + MaxBPM);
+		tv = (TextView)findViewById(R.id.HRPercent);
+		if (tv != null)tv.setText("%MaxHR: " + MaxHRPercent + "%");
+		
+		tv = (TextView)findViewById(R.id.HRZone);
+		if (tv != null)tv.setText(HRzone);
+		
 	}
 	
 	// add data to graph
