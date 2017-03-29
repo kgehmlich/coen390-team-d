@@ -2,6 +2,7 @@ package com.coen390.team_d.heartratemonitor;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -341,18 +342,23 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+		TextView tv;
+		tv = (TextView)findViewById(R.id.LineState);
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
 		switch (item.getItemId()) {
 			case R.id.toggleMonitoring:
 				//TODO toggleMonitoring() function with visual feedback
 				if(RemoteMonitoringFlag) {
 					RemoteMonitoringFlag = false;
-					Toast.makeText(getApplicationContext(),"Monitoring is OFF" ,Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(),"Monitoring is OFF" ,Toast.LENGTH_LONG).show();
+					if (tv != null)tv.setText("Offline");
+					if (tv != null)tv.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
 				}
 				else {
 					RemoteMonitoringFlag = true;
-					Toast.makeText(getApplicationContext(),"Monitoring is ON" ,Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(),"Monitoring is ON" ,Toast.LENGTH_LONG).show();
+					if (tv != null)tv.setText("Online");
+					if (tv != null)tv.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
 				}
 				break;
 			case R.id.teamMonitoring:
@@ -619,6 +625,7 @@ public class MainActivity extends AppCompatActivity {
 				HRzone = "Moderate";
 				break;
 			default:
+				HRzone = "Rest";
 				break;
 		}
 		
