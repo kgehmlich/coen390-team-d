@@ -1,6 +1,6 @@
 [
     {
-        "outputFile": "C:\\Users\\Kyle\\AndroidWorkspace\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-hdpi-v4\\values-hdpi-v4.xml",
+        "outputFile": "C:\\Users\\kgehm\\AndroidStudioProjects\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-hdpi-v4\\values-hdpi-v4.xml",
         "map": [
             {
                 "to": {
@@ -12,7 +12,7 @@
                     "endOffset": 327
                 },
                 "from": {
-                    "file": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\values-hdpi\\values-hdpi.xml",
+                    "file": "C:\\Users\\kgehm\\.android\\build-cache\\6d62290d5ac643843ca5e27f1f3ad3d1cf2b4355\\output\\res\\values-hdpi\\values-hdpi.xml",
                     "position": {
                         "startLine": 4,
                         "startColumn": 4,

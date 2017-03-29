@@ -1,6 +1,6 @@
 [
     {
-        "outputFile": "C:\\Users\\Kyle\\AndroidWorkspace\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-v22\\values-v22.xml",
+        "outputFile": "C:\\Users\\kgehm\\AndroidStudioProjects\\coen390-team-d\\AWSMobileHelper\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-v22\\values-v22.xml",
         "map": [
             {
                 "to": {
@@ -11,7 +11,7 @@
                     "endOffset": 125
                 },
                 "from": {
-                    "file": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\values-v22\\values-v22.xml",
+                    "file": "C:\\Users\\kgehm\\.android\\build-cache\\6d62290d5ac643843ca5e27f1f3ad3d1cf2b4355\\output\\res\\values-v22\\values-v22.xml",
                     "position": {
                         "startLine": 4,
                         "startColumn": 4,
@@ -30,7 +30,7 @@
                     "endOffset": 212
                 },
                 "from": {
-                    "file": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\values-v22\\values-v22.xml",
+                    "file": "C:\\Users\\kgehm\\.android\\build-cache\\6d62290d5ac643843ca5e27f1f3ad3d1cf2b4355\\output\\res\\values-v22\\values-v22.xml",
                     "position": {
                         "startLine": 5,
                         "startColumn": 4,
@@ -50,7 +50,7 @@
                     "endOffset": 393
                 },
                 "from": {
-                    "file": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\values-v22\\values-v22.xml",
+                    "file": "C:\\Users\\kgehm\\.android\\build-cache\\6d62290d5ac643843ca5e27f1f3ad3d1cf2b4355\\output\\res\\values-v22\\values-v22.xml",
                     "position": {
                         "startLine": 6,
                         "startColumn": 4,
@@ -71,7 +71,7 @@
                     "endOffset": 586
                 },
                 "from": {
-                    "file": "C:\\Users\\Kyle\\.android\\build-cache\\e5bfb74068fb91f4091b5897057d53cbfb010962\\output\\res\\values-v22\\values-v22.xml",
+                    "file": "C:\\Users\\kgehm\\.android\\build-cache\\6d62290d5ac643843ca5e27f1f3ad3d1cf2b4355\\output\\res\\values-v22\\values-v22.xml",
                     "position": {
                         "startLine": 9,
                         "startColumn": 4,

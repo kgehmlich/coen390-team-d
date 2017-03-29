@@ -37,19 +37,19 @@ import java.util.ArrayList;
 import java.util.concurrent.RunnableFuture;
 
 public class TeamMonitoringActivity extends AppCompatActivity {
-  
+
   private LineGraphSeries<DataPoint> series;
 
 	private Handler updateHandler;
     private final static int UPDATE_DELAY_SECS = 10;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_team_monitoring);
 
 		//Create graph
-		GraphView graph = (GraphView) findViewById(R.id.graph);
+		GraphView graph = (GraphView) findViewById(R.id.graphTeam);
 		series = new LineGraphSeries<DataPoint>();
 
 		//Set Graph Formatting
@@ -107,13 +107,13 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		inflater.inflate(R.menu.team_monitoring_menu, menu);
 		return true;
 	}
-	
+
 	/**
 	 * Handles menu item clicks
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
 		switch (item.getItemId()) {
 			case R.id.settings:
@@ -124,13 +124,13 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		}
 		return true;
 	}
-	
+
 	private void goToSettingsActivity() {
 		Intent intent = new Intent(TeamMonitoringActivity.this, SettingsActivity.class);
 		startActivity(intent);
 	}
-  
-  
+
+
 	// Function that allows the graph to be real-time updated
 	@Override
 	protected void onResume(){
