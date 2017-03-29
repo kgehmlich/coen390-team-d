@@ -1,0 +1,170 @@
+@startuml
+
+package com.coen390.team_d.heartratemonitor. {
+
+	class Application {
+		__ Methods __
+		+onCreate()
+		-initializeApplication()
+	}
+
+	class AWSDatabaseHelper {
+		__ Fields __
+		-Context _context;
+		-String noNameString
+		-HeartRatesDO _item;
+
+		__ Methods __
+		+sendAlert()
+		+updateHeartRate()
+		+getListOfHeartRates()
+		-send()
+	}
+
+	interface GMailSender{
+		__ Fields __
+		-String mailhost
+		-String user
+		-String password
+		-Session session
+
+		__ Methods __
+		+sendMail()
+		+GMailSender()
+		#getPasswordAuthentication()
+		-initializeApplication()
+	}
+
+	interface JSSEProvider {
+		__ Methods __
+		+JSSEProvider()
+	}
+
+	class FetchHeartRates {
+			__ Fields __
+			-ArrayList<HeartRatesDO> hrList
+
+			__ Methods __
+			#doInBackground()
+			#onPostExecute()
+		}
+
+	class NewConnectedListener{
+		__ Fields __
+		-Handler _OldHandler
+		-Handler _aNewHandler
+		-int GP_MSG_ID
+		-int GP_HANDLER_ID
+		-int HR_SPD_DIST_PACKET
+		-final int HEART_RATE
+		-final int INSTANT_SPEED
+		-HRSpeedDistPacketInfo HRSpeedDistPacket
+
+		__ Methods __
+		+NewConnectedListener()
+		+Connected()
+
+	}
+
+	package Activities {
+
+		class MainActivity {
+			__ Fields __
+			-static final String TAG
+			-long MAX_MINUTES
+			-Date notificationDate
+			-BluetoothAdapter _btAdapter
+			-BTClient _bt
+			-NewConnectedListener _NConnListener
+			~ZephyrProtocol _protocol
+			-final ArrayList<Integer> heartRateRecentHistory
+			-final static int AVG_HR_COUNT
+			-final int HEART_RATE
+			-final int INSTANT_SPEED
+			-final static int REQUEST_ENABLE_BT
+			-Queue<HR> HRTenSecAvgData
+			-Queue<HR> HROneMinAvgData
+
+			__ Methods __
+			+onCreateOptionsMenu()
+			+onOptionsItemSelected()
+			#onCreate()
+			#onActivityResult()
+			-onClickAlertButton()
+			-goToTeamMonitoringActivity()
+			-goToSettingsActivity()
+			-btAlertAndExit()
+			-HRAverages()
+		}
+
+		class TeamMonitoringActivity {
+			__ Fields __
+			-Handler updateHandler
+			-final static int UPDATE_DELAY_SEC
+			-class FetchHeartRates
+			#Runnable updateHeartRates
+			__ Methods __
+			+onCreateOptionsMenu()
+			+onOptionsItemSelected()
+			-goToSettingsActivity()
+			#onCreate()
+			#onDestroy()
+			#onResume()
+
+		}
+
+		class SettingsActivity {
+			__ Fields __
+			-LineGraphSeries<DataPoint> series
+
+			__ Methods __
+			+onCreateOptionsMenu()
+			+onOptionsItemSelected()
+			#onCreate()
+			#onClickSaveButton()
+			#onResume()
+			-addEntry()
+		}
+	}
+}
+
+
+	package android.content. {
+		class SharedPreferences
+	}
+	package android.os. {
+		class AsyncTask
+	}
+	package android.support.v7.app. {
+		class AppCompatActivity
+	}
+	package android.support.multidex. {
+		class MultiDexApplication
+	}
+	package zephyr.android.HxMBT. {
+		class BTClient
+		class ZephyrProtocol
+		class ConnectListenerImpl
+	}
+
+
+JSSEProvider -right--o GMailSender
+NewConnectedListener -left--|> ConnectListenerImpl
+Application -up--|> MultiDexApplication
+AWSDatabaseHelper -up..> SharedPreferences
+MainActivity -down..> BTClient
+MainActivity -down..> ZephyrProtocol
+MainActivity -down--|> AppCompatActivity
+SettingsActivity -down--|> AppCompatActivity
+TeamMonitoringActivity -down--|> AppCompatActivity
+FetchHeartRates -up--|> AsyncTask
+FetchHeartRates -up--o TeamMonitoringActivity
+NewConnectedListener -up--o MainActivity
+GMailSender -up--o MainActivity
+
+
+SettingsActivity -up..> SharedPreferences
+AWSDatabaseHelper -up--o MainActivity
+AWSDatabaseHelper -up--o TeamMonitoringActivity
+
+@enduml
