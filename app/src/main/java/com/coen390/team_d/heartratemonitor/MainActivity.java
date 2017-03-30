@@ -16,6 +16,7 @@ import android.widget.Toast;
 import android.graphics.Color;
 import android.graphics.Paint;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -37,6 +38,8 @@ import android.widget.TextView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -70,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
 	
 	private final static int REQUEST_ENABLE_BT = 1;
 	private LineGraphSeries<DataPoint> series;
+	private LineGraphSeries<DataPoint> seriesAvg1;
+	private LineGraphSeries<DataPoint> seriesAvg2;
+	private GraphView graph;
 	
 	//Fields for HRAverages()
 	private Queue<Integer> HRTenSecAvgData = new LinkedList();
@@ -77,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
 	private int TenSecTotal = 0;
 	private int OneMinTotal = 0;
 	private int MaxBPM;
-	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -266,18 +271,19 @@ public class MainActivity extends AppCompatActivity {
 				tv.setText(errorText);
 			}
 		}*/
+		
 		//Create graph
-		GraphView graph = (GraphView) findViewById(R.id.graph);
+		graph = (GraphView) findViewById(R.id.graph);
 		series = new LineGraphSeries<DataPoint>();
 		
 		//Set Graph Formatting
 		Paint paint = new Paint();
 		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(2);
+		paint.setStrokeWidth(6);
 		paint.setColor(Color.RED);
 		series.setCustomPaint(paint);
 		series.setDrawDataPoints(true);
-		series.setDataPointsRadius(10);
+		series.setDataPointsRadius(4);
 		//Method for displaying point information when a point is tapped
 		series.setOnDataPointTapListener(new OnDataPointTapListener() {
 			@Override
@@ -292,18 +298,33 @@ public class MainActivity extends AppCompatActivity {
 		//need manual bounds for scrolling to function
 		// set manual Y bounds (Heart Rate)
 		graph.getViewport().setYAxisBoundsManual(true);
-		graph.getViewport().setMinY(0);
-		graph.getViewport().setMaxY(200);
+		graph.getViewport().setMinY(30);
+		graph.getViewport().setMaxY(150);
 		
 		// set manual X bounds (Time points)
 		graph.getViewport().setXAxisBoundsManual(true);
-		graph.getViewport().setMinX(0);
-		graph.getViewport().setMaxX(20);
+		//graph.getViewport().setMinX(0);
+		//graph.getViewport().setMaxX(600);
 		
 		graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-		graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
+		graph.getViewport().setScalableY(false); // enables vertical zooming and scrolling
 		//Creates graph using series
 		graph.addSeries(series);
+		
+		Date d1 = new Date();
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+		// set date label formatter
+		graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, new SimpleDateFormat("HH:mm:ss")));
+		graph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
+		// set manual x bounds to have nice steps
+		graph.getViewport().setMinX(d1.getTime());
+		graph.getViewport().setMaxX(d1.getTime()+300000);
+		graph.getViewport().setXAxisBoundsManual(true);
+
+// as we use dates as labels, the human rounding to nice readable numbers
+// is not necessary
+		graph.getGridLabelRenderer().setHumanRounding(false);
 	}
 	
 	private void onClickAlertButton(View v) {
@@ -476,6 +497,8 @@ public class MainActivity extends AppCompatActivity {
 					HRAverages(heartRateInt);
 					//HR Zones Calculation and UI updates
 					HRZones(heartRateInt);
+					//Add an entry to the graph
+					addEntry((double) heartRateInt);
 					
 					if (RemoteMonitoringFlag){
 						// Store heart rate locally
@@ -541,6 +564,7 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onResume(){
 		super.onResume();
+		/*
 		//Thread in control of updating data series
 		new Thread(new Runnable() {
 			@Override
@@ -561,7 +585,7 @@ public class MainActivity extends AppCompatActivity {
 					// manage error if need be...
 				}
 			}
-		}).start();
+		}).start();*/
 	}
 	
 	private void HRAverages(int HR){
@@ -640,11 +664,10 @@ public class MainActivity extends AppCompatActivity {
 	}
 	
 	// add data to graph
-	private void addEntry() {
+	private void addEntry(double y) {
 		// here, we choose to display max 30 points on the graph and we scroll to end
 		//TODO: needs proper inputs from AWS here
-		double x = 1;
-		double y = 1;
-		series.appendData(new DataPoint(x, y), true, 30);
+		Date x = new Date();
+		series.appendData(new DataPoint(x, y), false, 600);
 	}
 }
