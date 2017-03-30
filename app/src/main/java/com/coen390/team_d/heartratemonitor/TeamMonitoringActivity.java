@@ -18,6 +18,8 @@ import android.view.MenuItem;
 //Graph related imports
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
@@ -195,7 +197,18 @@ public class TeamMonitoringActivity extends AppCompatActivity {
                 hrListStrings.add(temp);
             }
 
-            ArrayAdapter adapter = new ArrayAdapter(TeamMonitoringActivity.this, android.R.layout.simple_expandable_list_item_1, hrListStrings);
+            ArrayAdapter adapter = new ArrayAdapter(TeamMonitoringActivity.this, android.R.layout.simple_expandable_list_item_1, hrListStrings) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View view = super.getView(position, convertView, parent);
+                    if (hrList.get(position).getAlert()) {
+                        view.setBackgroundColor(Color.YELLOW);
+                    } else {
+                        view.setBackgroundColor(Color.WHITE);
+                    }
+                    return view;
+                }
+            };
             hrListView.setAdapter(adapter);
         }
     }
