@@ -156,73 +156,17 @@ public class MainActivity extends AppCompatActivity {
 		////////////////////
 		
 		//Obtaining the handle to act on the CONNECT button
-		/*TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-		String ErrorText  = "Not Connected to HxM ! !";
-		tv.setText(ErrorText);*/
 		
 		Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
 		if (btnConnect != null)
 		{
 			btnConnect.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					String BhMacID = "00:07:80:9D:8A:E8";
-					//String BhMacID = "00:07:80:88:F6:BF";
-					_btAdapter = BluetoothAdapter.getDefaultAdapter();
-					
-					Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
-					
-					if (pairedDevices.size() > 0)
-					{
-						for (BluetoothDevice device : pairedDevices)
-						{
-							if (device.getName().startsWith("HXM"))
-							{
-								BhMacID = device.getAddress();
-								break;
-								
-							}
-						}
-						
-						
-					}
-					
-					BluetoothDevice Device = _btAdapter.getRemoteDevice(BhMacID);
-					String DeviceName = Device.getName();
-					_bt = new BTClient(_btAdapter, BhMacID);
-					_NConnListener = new NewConnectedListener(Newhandler,Newhandler);
-					_bt.addConnectedEventListener(_NConnListener);
-					
-					TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
-					tv1.setText("Heart Rate: 000");
-					
-					if(_bt.IsConnected())
-					{
-						_bt.start();
-					}
+					onClickConnectButton();
 				}
 			});
 		}
-		/*Obtaining the handle to act on the DISCONNECT button*/
-		/*Button btnDisconnect = (Button) findViewById(R.id.ButtonDisconnect);
-		if (btnDisconnect != null)
-		{
-			btnDisconnect.setOnClickListener(new View.OnClickListener() {
-				@Override
-				*//*Functionality to act if the button DISCONNECT is touched*//*
-				public void onClick(View v) {
-					*//*Reset the global variables*//*
-					TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-					String ErrorText  = "Disconnected from HxM!";
-					tv.setText(ErrorText);
 
-					*//*This disconnects listener from acting on received messages*//*
-					_bt.removeConnectedEventListener(_NConnListener);
-					*//*Close the communication with the device & throw an exception if failure*//*
-					_bt.Close();
-
-				}
-			});
-		}*/
 		
 		// At this point bluetooth should be available and enabled
 		// Attempt to find HxM monitor in paired devices
@@ -266,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
 				tv.setText(errorText);
 			}
 		}*/
+
 		//Create graph
 		GraphView graph = (GraphView) findViewById(R.id.graph);
 		series = new LineGraphSeries<DataPoint>();
@@ -305,6 +250,75 @@ public class MainActivity extends AppCompatActivity {
 		//Creates graph using series
 		graph.addSeries(series);
 	}
+
+
+    private void onClickConnectButton() {
+        String BhMacID = "00:07:80:9D:8A:E8";
+        //String BhMacID = "00:07:80:88:F6:BF";
+        _btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
+
+        if (pairedDevices.size() > 0)
+        {
+            for (BluetoothDevice device : pairedDevices)
+            {
+                if (device.getName().startsWith("HXM"))
+                {
+                    BhMacID = device.getAddress();
+                    break;
+
+                }
+            }
+
+
+        }
+
+        _bt = new BTClient(_btAdapter, BhMacID);
+        _NConnListener = new NewConnectedListener(Newhandler,Newhandler);
+        _bt.addConnectedEventListener(_NConnListener);
+
+        TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
+        tv1.setText("Heart Rate: 000");
+
+        if(_bt.IsConnected())
+        {
+            _bt.start();
+
+            // Set button text to "Disconnect" and modify click listener
+            Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
+            if (btnConnect != null)
+            {
+                btnConnect.setText("Disconnect");
+                btnConnect.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        onClickDisconnectButton();
+                    }
+                });
+            }
+        }
+    }
+
+    private void onClickDisconnectButton() {
+        /*This disconnects listener from acting on received messages*/
+        _bt.removeConnectedEventListener(_NConnListener);
+
+        /*Close the communication with the device & throw an exception if failure*/
+        _bt.Close();
+
+        // Set button text to "Connect" and modify click listener
+        Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
+        if (btnConnect != null)
+        {
+            btnConnect.setText("Connect");
+            btnConnect.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    onClickConnectButton();
+                }
+            });
+        }
+    }
+
 	
 	private void onClickAlertButton(View v) {
 		
