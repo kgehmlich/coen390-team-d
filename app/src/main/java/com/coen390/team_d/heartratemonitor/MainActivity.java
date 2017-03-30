@@ -32,7 +32,6 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.lang.reflect.InvocationTargetException;
@@ -110,26 +109,7 @@ public class MainActivity extends AppCompatActivity {
 		// Registering the BTBondReceiver in the application that the status of the receiver has changed to Paired
 		IntentFilter filter2 = new IntentFilter("android.bluetooth.device.action.BOND_STATE_CHANGED");
 		this.getApplicationContext().registerReceiver(new BTBondReceiver(), filter2);
-		
-		/////////////////////////////////////////
-		// Check for bluetooth and get adapter //
-		/////////////////////////////////////////
-		_btAdapter = BluetoothAdapter.getDefaultAdapter();
-		
-		// Does this device support bluetooth?
-		if (_btAdapter == null) {
-			// If bluetooth is not supported...
-			// show alert and quit
-			btAlertAndExit();
-		}
-		
-		// Is bluetooth enabled?
-		if (!_btAdapter.isEnabled()) {
-			// If not, ask user to enable it
-			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-		}
-		
+
 		
 		////////////////
 		// SIMULATION //
@@ -253,6 +233,25 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void onClickConnectButton() {
+
+        // Check for bluetooth and get adapter
+        _btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        // Does this device support bluetooth?
+        if (_btAdapter == null) {
+            // If bluetooth is not supported, show alert and return
+            btAlertMsg();
+            return;
+        }
+
+        // Is bluetooth enabled?
+        if (!_btAdapter.isEnabled()) {
+            // If not, ask user to enable it
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+
         String BhMacID = "00:07:80:9D:8A:E8";
         //String BhMacID = "00:07:80:88:F6:BF";
         _btAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -412,21 +411,21 @@ public class MainActivity extends AppCompatActivity {
 				Toast.makeText(getApplicationContext(), "Bluetooth is ENABLED", Toast.LENGTH_SHORT).show();
 			}
 			else {
-				// Show alert then exit
-				btAlertAndExit();
+				// Show alert
+				btAlertMsg();
 			}
 		}
 	}
 	
 	
-	private void btAlertAndExit() {
+	private void btAlertMsg() {
 		// Show alert then exit
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.bt_required);
 		builder.setCancelable(false);
-		builder.setPositiveButton("Quit", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				finishAndRemoveTask();  // requires at least API 21!
+				//finishAndRemoveTask();  // requires at least API 21!
 			}
 		});
 		AlertDialog dialog = builder.create();
