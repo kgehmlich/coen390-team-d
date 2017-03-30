@@ -277,17 +277,15 @@ public class MainActivity extends AppCompatActivity {
         _NConnListener = new NewConnectedListener(Newhandler,Newhandler);
         _bt.addConnectedEventListener(_NConnListener);
 
-        TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
-        tv1.setText("Heart Rate: 000");
+//        TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
+//        tv1.setText("Heart Rate: 000");
 
-        if(_bt.IsConnected())
-        {
+        if (_bt.IsConnected()) {
             _bt.start();
 
             // Set button text to "Disconnect" and modify click listener
             Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
-            if (btnConnect != null)
-            {
+            if (btnConnect != null) {
                 btnConnect.setText("Disconnect");
                 btnConnect.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
@@ -295,6 +293,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
+        } else {
+            // Show toast "Unable to connect to Bluetooth device"
+            Toast.makeText(getApplicationContext(), "Unable to connect to Bluetooth device", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -408,7 +409,7 @@ public class MainActivity extends AppCompatActivity {
 		if (requestCode == REQUEST_ENABLE_BT) {
 			// If yes, check the result
 			if (resultCode == RESULT_OK) {
-				Toast.makeText(getApplicationContext(), "Bluetooth is ENABLED", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "Bluetooth has been enabled. Please click Connect to connect to device.", Toast.LENGTH_SHORT).show();
 			}
 			else {
 				// Show alert
