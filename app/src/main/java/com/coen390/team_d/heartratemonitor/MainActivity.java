@@ -73,10 +73,9 @@ public class MainActivity extends AppCompatActivity {
 	
 	private final static int REQUEST_ENABLE_BT = 1;
 	private LineGraphSeries<DataPoint> series;
-	private LineGraphSeries<DataPoint> seriesAvg1;
-	private LineGraphSeries<DataPoint> seriesAvg2;
 	private GraphView graph;
-	
+	private final int GraphSize = 600000;
+	private int DatapointCounter;
 	//Fields for HRAverages()
 	private Queue<Integer> HRTenSecAvgData = new LinkedList();
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
@@ -173,6 +172,9 @@ public class MainActivity extends AppCompatActivity {
 					String BhMacID = "00:07:80:9D:8A:E8";
 					//String BhMacID = "00:07:80:88:F6:BF";
 					_btAdapter = BluetoothAdapter.getDefaultAdapter();
+					
+					Toast.makeText(getApplicationContext(),"Connecting...",Toast.LENGTH_SHORT).show();
+					
 					
 					Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
 					
@@ -292,17 +294,17 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 		
-		//graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
-		graph.getGridLabelRenderer().setVerticalAxisTitle("Heart Rate");
+		graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
+		graph.getGridLabelRenderer().setVerticalAxisTitle("BPM");
 		
 		//need manual bounds for scrolling to function
 		// set manual Y bounds (Heart Rate)
 		graph.getViewport().setYAxisBoundsManual(true);
 		graph.getViewport().setMinY(30);
-		graph.getViewport().setMaxY(150);
+		graph.getViewport().setMaxY(200);
 		
 		// set manual X bounds (Time points)
-		graph.getViewport().setXAxisBoundsManual(true);
+		//graph.getViewport().setXAxisBoundsManual(true);
 		//graph.getViewport().setMinX(0);
 		//graph.getViewport().setMaxX(600);
 		
@@ -319,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
 		graph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
 		// set manual x bounds to have nice steps
 		graph.getViewport().setMinX(d1.getTime());
-		graph.getViewport().setMaxX(d1.getTime()+300000);
+		graph.getViewport().setMaxX(d1.getTime()+GraphSize);
 		graph.getViewport().setXAxisBoundsManual(true);
 
 // as we use dates as labels, the human rounding to nice readable numbers
@@ -668,6 +670,10 @@ public class MainActivity extends AppCompatActivity {
 		// here, we choose to display max 30 points on the graph and we scroll to end
 		//TODO: needs proper inputs from AWS here
 		Date x = new Date();
-		series.appendData(new DataPoint(x, y), false, 600);
+		DatapointCounter++;
+		Boolean GraphScroll = false;
+		if (DatapointCounter > GraphSize)
+			GraphScroll = true;
+		series.appendData(new DataPoint(x, y), GraphScroll, 1800);
 	}
 }
