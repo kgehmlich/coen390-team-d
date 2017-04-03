@@ -55,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
 	// TAG for logging to console
 	private boolean RemoteMonitoringFlag = true;
 	private static final String TAG = "MainActivity";
-	private long MAX_MINUTES = MILLISECONDS.convert(5,MINUTES);
+	private long MAX_MINUTES = MILLISECONDS.convert(2,MINUTES);
+	private int validationCounter;
 	private Date notificationDate;
 	private BluetoothAdapter _btAdapter = null;
 	private BTClient _bt;
@@ -486,10 +487,17 @@ public class MainActivity extends AppCompatActivity {
 						int age = prefs.getInt("age", 20);
 						float maxHeartRate = (float)(208 - 0.7*age);
 						if (heartRateValue > maxHeartRate) {
+
 							boolean sendEmail = false;
 							if (notificationDate == null) {
-								long durationTime = Calendar.getInstance().getTimeInMillis();
-								sendEmail = true;
+								validationCounter++;
+								if  (validationCounter>10){
+									long durationTime = Calendar.getInstance().getTimeInMillis();
+									notificationDate = new Date(durationTime);
+									sendEmail = true;
+									validationCounter=0;
+								}
+
 							} else {
 								long durationTime = Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
 								if (durationTime > MAX_MINUTES) {
