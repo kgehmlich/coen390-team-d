@@ -193,7 +193,13 @@ public class TeamMonitoringActivity extends AppCompatActivity {
             ArrayList<String> hrListStrings = new ArrayList<>();
 
             for (HeartRatesDO hr : hrList) {
-                String temp = hr.getUserId() + "\t\t" + hr.getHeartRate().toString();
+                String temp = hr.getUserId() + "\t\t";
+
+                if (hr.getHeartRate() == -1) {
+                    temp += "MANUAL ALERT";
+                } else {
+                    temp += hr.getHeartRate().toString();
+                }
                 hrListStrings.add(temp);
             }
 
