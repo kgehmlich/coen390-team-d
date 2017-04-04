@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Heartrate Monitor</string>
     <string name="title_activity_team_monitoring">teamMonitoringActivity</string>
-    <string name="bt_required">Bluetooth is required. Exiting...</string>
+    <string name="bt_required">Bluetooth is required to connect to device</string>
 </resources>

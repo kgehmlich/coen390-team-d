@@ -32,7 +32,6 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.lang.reflect.InvocationTargetException;
@@ -110,26 +109,7 @@ public class MainActivity extends AppCompatActivity {
 		// Registering the BTBondReceiver in the application that the status of the receiver has changed to Paired
 		IntentFilter filter2 = new IntentFilter("android.bluetooth.device.action.BOND_STATE_CHANGED");
 		this.getApplicationContext().registerReceiver(new BTBondReceiver(), filter2);
-		
-		/////////////////////////////////////////
-		// Check for bluetooth and get adapter //
-		/////////////////////////////////////////
-		_btAdapter = BluetoothAdapter.getDefaultAdapter();
-		
-		// Does this device support bluetooth?
-		if (_btAdapter == null) {
-			// If bluetooth is not supported...
-			// show alert and quit
-			btAlertAndExit();
-		}
-		
-		// Is bluetooth enabled?
-		if (!_btAdapter.isEnabled()) {
-			// If not, ask user to enable it
-			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-		}
-		
+
 		
 		////////////////
 		// SIMULATION //
@@ -156,73 +136,17 @@ public class MainActivity extends AppCompatActivity {
 		////////////////////
 		
 		//Obtaining the handle to act on the CONNECT button
-		/*TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-		String ErrorText  = "Not Connected to HxM ! !";
-		tv.setText(ErrorText);*/
 		
 		Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
 		if (btnConnect != null)
 		{
 			btnConnect.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					String BhMacID = "00:07:80:9D:8A:E8";
-					//String BhMacID = "00:07:80:88:F6:BF";
-					_btAdapter = BluetoothAdapter.getDefaultAdapter();
-					
-					Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
-					
-					if (pairedDevices.size() > 0)
-					{
-						for (BluetoothDevice device : pairedDevices)
-						{
-							if (device.getName().startsWith("HXM"))
-							{
-								BhMacID = device.getAddress();
-								break;
-								
-							}
-						}
-						
-						
-					}
-					
-					BluetoothDevice Device = _btAdapter.getRemoteDevice(BhMacID);
-					String DeviceName = Device.getName();
-					_bt = new BTClient(_btAdapter, BhMacID);
-					_NConnListener = new NewConnectedListener(Newhandler,Newhandler);
-					_bt.addConnectedEventListener(_NConnListener);
-					
-					TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
-					tv1.setText("Heart Rate: 000");
-					
-					if(_bt.IsConnected())
-					{
-						_bt.start();
-					}
+					onClickConnectButton();
 				}
 			});
 		}
-		/*Obtaining the handle to act on the DISCONNECT button*/
-		/*Button btnDisconnect = (Button) findViewById(R.id.ButtonDisconnect);
-		if (btnDisconnect != null)
-		{
-			btnDisconnect.setOnClickListener(new View.OnClickListener() {
-				@Override
-				*//*Functionality to act if the button DISCONNECT is touched*//*
-				public void onClick(View v) {
-					*//*Reset the global variables*//*
-					TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-					String ErrorText  = "Disconnected from HxM!";
-					tv.setText(ErrorText);
 
-					*//*This disconnects listener from acting on received messages*//*
-					_bt.removeConnectedEventListener(_NConnListener);
-					*//*Close the communication with the device & throw an exception if failure*//*
-					_bt.Close();
-
-				}
-			});
-		}*/
 		
 		// At this point bluetooth should be available and enabled
 		// Attempt to find HxM monitor in paired devices
@@ -266,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
 				tv.setText(errorText);
 			}
 		}*/
+
 		//Create graph
 		GraphView graph = (GraphView) findViewById(R.id.graph);
 		series = new LineGraphSeries<DataPoint>();
@@ -305,6 +230,96 @@ public class MainActivity extends AppCompatActivity {
 		//Creates graph using series
 		graph.addSeries(series);
 	}
+
+
+    private void onClickConnectButton() {
+
+        // Check for bluetooth and get adapter
+        _btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        // Does this device support bluetooth?
+        if (_btAdapter == null) {
+            // If bluetooth is not supported, show alert and return
+            btAlertMsg();
+            return;
+        }
+
+        // Is bluetooth enabled?
+        if (!_btAdapter.isEnabled()) {
+            // If not, ask user to enable it
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            return;
+        }
+
+
+        String BhMacID = "00:07:80:9D:8A:E8";
+        //String BhMacID = "00:07:80:88:F6:BF";
+        _btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
+
+        if (pairedDevices.size() > 0)
+        {
+            for (BluetoothDevice device : pairedDevices)
+            {
+                if (device.getName().startsWith("HXM"))
+                {
+                    BhMacID = device.getAddress();
+                    break;
+
+                }
+            }
+
+
+        }
+
+        _bt = new BTClient(_btAdapter, BhMacID);
+        _NConnListener = new NewConnectedListener(Newhandler,Newhandler);
+        _bt.addConnectedEventListener(_NConnListener);
+
+//        TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
+//        tv1.setText("Heart Rate: 000");
+
+        if (_bt.IsConnected()) {
+            _bt.start();
+
+            // Set button text to "Disconnect" and modify click listener
+            Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
+            if (btnConnect != null) {
+                btnConnect.setText("Disconnect");
+                btnConnect.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        onClickDisconnectButton();
+                    }
+                });
+            }
+        } else {
+            // Show toast "Unable to connect to Bluetooth device"
+            Toast.makeText(getApplicationContext(), "Unable to connect to Bluetooth device", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void onClickDisconnectButton() {
+        /*This disconnects listener from acting on received messages*/
+        _bt.removeConnectedEventListener(_NConnListener);
+
+        /*Close the communication with the device & throw an exception if failure*/
+        _bt.Close();
+
+        // Set button text to "Connect" and modify click listener
+        Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
+        if (btnConnect != null)
+        {
+            btnConnect.setText("Connect");
+            btnConnect.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    onClickConnectButton();
+                }
+            });
+        }
+    }
+
 	
 	private void onClickAlertButton(View v) {
 		
@@ -395,24 +410,24 @@ public class MainActivity extends AppCompatActivity {
 		if (requestCode == REQUEST_ENABLE_BT) {
 			// If yes, check the result
 			if (resultCode == RESULT_OK) {
-				Toast.makeText(getApplicationContext(), "Bluetooth is ENABLED", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "Bluetooth has been enabled. Please click Connect to connect to device.", Toast.LENGTH_SHORT).show();
 			}
 			else {
-				// Show alert then exit
-				btAlertAndExit();
+				// Show alert
+				btAlertMsg();
 			}
 		}
 	}
 	
 	
-	private void btAlertAndExit() {
+	private void btAlertMsg() {
 		// Show alert then exit
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.bt_required);
 		builder.setCancelable(false);
-		builder.setPositiveButton("Quit", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				finishAndRemoveTask();  // requires at least API 21!
+				//finishAndRemoveTask();  // requires at least API 21!
 			}
 		});
 		AlertDialog dialog = builder.create();
