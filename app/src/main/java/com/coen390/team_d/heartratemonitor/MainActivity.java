@@ -249,6 +249,7 @@ public class MainActivity extends AppCompatActivity {
             // If not, ask user to enable it
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            return;
         }
 
 
