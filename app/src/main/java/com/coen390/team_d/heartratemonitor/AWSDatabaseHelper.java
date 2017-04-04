@@ -13,6 +13,8 @@ import com.amazonaws.models.nosql.HeartRatesDO;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by kgehm on 2017-03-20.
@@ -116,6 +118,21 @@ public class AWSDatabaseHelper {
         for (int i = 0; i < scanList.size(); i++) {
             heartRatesList.add(scanList.get(i));
         }
+
+        Collections.sort(heartRatesList, new Comparator<HeartRatesDO>() {
+            @Override
+            public int compare(HeartRatesDO o1, HeartRatesDO o2) {
+                if (o1.getAlert() && !o2.getAlert()) {
+                    return -1;
+                }
+                if (o1.getAlert() == o2.getAlert()) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            }
+        });
+
         return heartRatesList;
     }
 
