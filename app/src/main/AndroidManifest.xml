@@ -24,12 +24,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".TeamMonitoringActivity"
-            android:parentActivityName=".MainActivity">
+            android:name=".TeamMonitoringActivity">
         </activity>
         <activity
-            android:name=".SettingsActivity"
-            android:parentActivityName=".MainActivity">
+            android:name=".SettingsActivity">
         </activity>
     </application>
 
