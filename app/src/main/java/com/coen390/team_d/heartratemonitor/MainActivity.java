@@ -230,8 +230,13 @@ public class MainActivity extends AppCompatActivity {
 		//Creates graph using series
 		graph.addSeries(series);
 	}
-
-
+	
+	@Override
+	protected void	onDestroy(){
+		super.onDestroy();
+		onClickDisconnectButton();
+	}
+	
     private void onClickConnectButton() {
 
         // Check for bluetooth and get adapter
