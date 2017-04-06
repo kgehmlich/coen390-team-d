@@ -90,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
 	private int TenSecTotal = 0;
 	private int OneMinTotal = 0;
+	float TenSecAvg;
+	float OneMinAvg;
 	private int MaxBPM = 200;
 	
 	@Override
@@ -551,59 +553,7 @@ public class MainActivity extends AppCompatActivity {
 					addEntry((double) heartRateInt);
 					
 					if (RemoteMonitoringFlag){
-						// Store heart rate locally
-						heartRateRecentHistory.add(heartRateInt);
-						
-						float heartRateValue = Float.valueOf(HeartRatetext);
-						SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-						int age = prefs.getInt("age", 20);
-						
-						float maxHeartRate = (float)(208 - 0.7*age);
-						
-						if (heartRateValue > MaxBPM) {
-							boolean sendEmail = false;
-							if (notificationDate == null) {
-								long durationTime = Calendar.getInstance().getTimeInMillis();
-								sendEmail = true;
-							} else {
-								long durationTime = Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
-								if (durationTime > MAX_MINUTES) {
-									sendEmail = true;
-								}
-							}
-							if (sendEmail) {
-								
-								// Send alert to AWS server
-								AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-								dbHelper.sendAlert(heartRateInt);
-								
-							/*GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com", "heartrate");
-							try {
-								gMailSender.sendMail("Notification Max HeartRate",
-										"Current HeartRate " + HeartRatetext,
-										"coen390teamd@gmail.com",
-										"coen390teamd@gmail.com");
-							} catch (Exception e) {
-								Log.e("SendMail", e.getMessage(), e);
-							}*/
-							} else {
-								// Average and send to server once we have AVG_HR_COUNT heart rates logged
-								if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
-									int total = 0;
-									for (int hr : heartRateRecentHistory) {
-										total += hr;
-									}
-									int avg = total / heartRateRecentHistory.size();
-									
-									// Send to server
-									AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-									dbHelper.updateHeartRate(avg);
-									
-									// Reset local hr storage
-									heartRateRecentHistory.clear();
-								}
-							}
-						}
+						RemoteMonitoringUpdate(heartRateInt);
 					}
 					break;
 				default:
@@ -643,8 +593,6 @@ public class MainActivity extends AppCompatActivity {
 	
 	private void HRAverages(int HR){
 		TextView tv;
-		float TenSecAvg;
-		float OneMinAvg;
 		TenSecTotal += HR;
 		OneMinTotal += HR;
 		HRTenSecAvgData.add(HR);
@@ -709,7 +657,6 @@ public class MainActivity extends AppCompatActivity {
 		if (tv != null)tv.setText("Max HR: " + MaxBPM);
 		tv = (TextView)findViewById(R.id.HRPercent);
 		if (tv != null)tv.setText("%MaxHR: " + MaxHRPercent + "%");
-		
 		tv = (TextView)findViewById(R.id.HRZone);
 		if (tv != null)tv.setText(HRzone);
 		
@@ -728,5 +675,16 @@ public class MainActivity extends AppCompatActivity {
 			GraphScroll = true;
 		}
 		series.appendData(new DataPoint(x, y), GraphScroll, GraphLength);
+	}
+	
+	private void RemoteMonitoringUpdate(int HR){
+		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+
+		if (HR > MaxBPM)
+			dbHelper.sendAlert(HR);
+		else if (DatapointCounter % 10000 == 0) {
+			dbHelper.updateHeartRate((int)TenSecAvg);
+			Log.d(TAG, "AWSDatabase Updated with : " + TenSecAvg);
+		}
 	}
 }
