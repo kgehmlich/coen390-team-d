@@ -16,6 +16,7 @@ import android.widget.Toast;
 import android.graphics.Color;
 import android.graphics.Paint;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.DataPointInterface;
@@ -70,28 +71,43 @@ public class MainActivity extends AppCompatActivity {
 	
 	private final int HEART_RATE = 0x100;
 	private final int INSTANT_SPEED = 0x101;
-	
 	private final static int REQUEST_ENABLE_BT = 1;
-	private LineGraphSeries<DataPoint> series;
+	
+	//Fields for Graph
 	private GraphView graph;
-	private final int GraphSize = 600000;
+	private final int GraphSize 	= 	360000; //Visible graph size, 6 mins, in ms
+	private final int GraphLength 	=	3600; //Total Graphed data length, 1 hour, in s
+	private long graphStart;
+	private long graphEnd;
 	private int DatapointCounter;
+	private int WaitToScroll;
+	Paint paint = new Paint();
+	private LineGraphSeries<DataPoint> series;
+	SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+	
 	//Fields for HRAverages()
 	private Queue<Integer> HRTenSecAvgData = new LinkedList();
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
 	private int TenSecTotal = 0;
 	private int OneMinTotal = 0;
-	private int MaxBPM;
+	private int MaxBPM = 200;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		
+				
 		// Initialize heart rate history
 		heartRateRecentHistory = new ArrayList<>();
 		
+		//////////////////
+		// Set up Graph //
+		//////////////////
+		setupGraph();
+		//////////////////
+		// Set up MaxHR //
+		//////////////////
+		setupMaxHR();
 		
 		Button alertButton = (Button) findViewById(R.id.alertButton);
 		alertButton.setOnClickListener(new View.OnClickListener()
@@ -200,7 +216,10 @@ public class MainActivity extends AppCompatActivity {
 					_bt.addConnectedEventListener(_NConnListener);
 					
 					TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
-					tv1.setText("Heart Rate: 000");
+					tv1.setText("Heart Rate:");
+					
+					//Reset Graph X bounds
+					refreshGraphBounds();
 					
 					if(_bt.IsConnected())
 					{
@@ -274,59 +293,7 @@ public class MainActivity extends AppCompatActivity {
 			}
 		}*/
 		
-		//Create graph
-		graph = (GraphView) findViewById(R.id.graph);
-		series = new LineGraphSeries<DataPoint>();
-		
-		//Set Graph Formatting
-		Paint paint = new Paint();
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(6);
-		paint.setColor(Color.RED);
-		series.setCustomPaint(paint);
-		series.setDrawDataPoints(true);
-		series.setDataPointsRadius(4);
-		//Method for displaying point information when a point is tapped
-		series.setOnDataPointTapListener(new OnDataPointTapListener() {
-			@Override
-			public void onTap(Series series, DataPointInterface dataPoint) {
-				Toast.makeText(getApplicationContext()," " + dataPoint,Toast.LENGTH_SHORT).show();
-			}
-		});
-		
-		graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
-		graph.getGridLabelRenderer().setVerticalAxisTitle("BPM");
-		
-		//need manual bounds for scrolling to function
-		// set manual Y bounds (Heart Rate)
-		graph.getViewport().setYAxisBoundsManual(true);
-		graph.getViewport().setMinY(30);
-		graph.getViewport().setMaxY(200);
-		
-		// set manual X bounds (Time points)
-		//graph.getViewport().setXAxisBoundsManual(true);
-		//graph.getViewport().setMinX(0);
-		//graph.getViewport().setMaxX(600);
-		
-		graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-		graph.getViewport().setScalableY(false); // enables vertical zooming and scrolling
-		//Creates graph using series
-		graph.addSeries(series);
-		
-		Date d1 = new Date();
-		
-		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-		// set date label formatter
-		graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, new SimpleDateFormat("HH:mm:ss")));
-		graph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
-		// set manual x bounds to have nice steps
-		graph.getViewport().setMinX(d1.getTime());
-		graph.getViewport().setMaxX(d1.getTime()+GraphSize);
-		graph.getViewport().setXAxisBoundsManual(true);
 
-// as we use dates as labels, the human rounding to nice readable numbers
-// is not necessary
-		graph.getGridLabelRenderer().setHumanRounding(false);
 	}
 	
 	private void onClickAlertButton(View v) {
@@ -394,6 +361,87 @@ public class MainActivity extends AppCompatActivity {
 				return super.onOptionsItemSelected(item);
 		}
 		return true;
+	}
+	
+	/////////////////
+	// Graph setup //
+	/////////////////
+	private void setupGraph(){
+		graph = (GraphView) findViewById(R.id.graph);
+		
+		graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
+		graph.getGridLabelRenderer().setVerticalAxisTitle("BPM");
+		
+		//need manual bounds for scrolling to function
+		// set manual Y bounds (Heart Rate)
+		graph.getViewport().setYAxisBoundsManual(true);
+		// set manual x bounds to have nice steps
+		graph.getViewport().setXAxisBoundsManual(true);
+		graph.getViewport().setScrollable(true); // enables horizontal scrolling
+		graph.getViewport().setScalableY(false); // disables vertical zooming and scrolling
+		
+		//Setup data series
+		setupSeries();
+		graph.addSeries(series);
+		
+		// set date label formatter
+		graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, formatter));
+		graph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
+		
+		// as we use dates as labels, the human rounding to nice readable numbers
+		// is not necessary
+		graph.getGridLabelRenderer().setHumanRounding(false);
+		
+		graph.getViewport().setOnXAxisBoundsChangedListener(new Viewport.OnXAxisBoundsChangedListener() {
+			@Override
+			public void onXAxisBoundsChanged(double minX, double maxX, Reason reason) {
+				Log.d(TAG, "XAxis Bounds Changed : Waiting to scroll to end");
+				WaitToScroll = 3;
+			}
+		});
+		
+		refreshGraphBounds();
+		
+	}
+	
+	private void setupSeries(){
+		series = new LineGraphSeries<>();
+		//Set Graph Formatting
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(6);
+		paint.setColor(Color.RED);
+		series.setCustomPaint(paint);
+		series.setDrawDataPoints(true);
+		series.setDataPointsRadius(4);
+		//Method for displaying point information when a point is tapped
+		series.setOnDataPointTapListener(new OnDataPointTapListener() {
+			@Override
+			public void onTap(Series series, DataPointInterface dataPoint) {
+				Date d = new Date((long)dataPoint.getX());
+				Toast.makeText(getApplicationContext(), formatter.format(d) + " : " + (int) dataPoint.getY() + " BPM",Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+	private void refreshGraphBounds(){
+		Date d1 = new Date();
+		graphStart = d1.getTime()/120000*120000; //Rounds the bound to the 2 minutes
+		graphEnd = graphStart+GraphSize;
+		graph.getViewport().setMinX(graphStart);
+		graph.getViewport().setMaxX(graphEnd);
+		graph.getViewport().setMinY(30);
+		if (MaxBPM > 200)
+			graph.getViewport().setMaxY(MaxBPM);
+		else
+			graph.getViewport().setMaxY(200);
+	}
+	
+	private void setupMaxHR(){
+		
+		//TODO if MAXBPM!=null in SharedPref, MaxBPM = SharedPref.GetMAXBPM()
+		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+		int age = prefs.getInt("age", 20);
+		MaxBPM = 208 - (7 * age /10);
+		Log.d(TAG, "MaxBPM set to : " + MaxBPM);
 	}
 	
 	private void goToTeamMonitoringActivity() {
@@ -509,8 +557,10 @@ public class MainActivity extends AppCompatActivity {
 						float heartRateValue = Float.valueOf(HeartRatetext);
 						SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 						int age = prefs.getInt("age", 20);
+						
 						float maxHeartRate = (float)(208 - 0.7*age);
-						if (heartRateValue > maxHeartRate) {
+						
+						if (heartRateValue > MaxBPM) {
 							boolean sendEmail = false;
 							if (notificationDate == null) {
 								long durationTime = Calendar.getInstance().getTimeInMillis();
@@ -563,6 +613,7 @@ public class MainActivity extends AppCompatActivity {
 	};
 	
 	//Function that allows the graph to be real-time updated
+	//Doesn't seem to be necessary
 	@Override
 	protected void onResume(){
 		super.onResume();
@@ -626,13 +677,12 @@ public class MainActivity extends AppCompatActivity {
 		TextView tv;
 		int MaxHRPercent;
 		String HRzone = new String();
-		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-		int age = prefs.getInt("age", 20);
-		MaxBPM = 220-age;
 		
-		if (HR > MaxBPM)
+		if (HR > MaxBPM) {
 			MaxBPM = HR;
+		}
 		MaxHRPercent = HR*100/MaxBPM;
+		//TODO Set MAXBPM as SharedPref entry
 		
 		switch (MaxHRPercent/10){
 			case 9:
@@ -667,13 +717,16 @@ public class MainActivity extends AppCompatActivity {
 	
 	// add data to graph
 	private void addEntry(double y) {
-		// here, we choose to display max 30 points on the graph and we scroll to end
-		//TODO: needs proper inputs from AWS here
 		Date x = new Date();
-		DatapointCounter++;
+		DatapointCounter += 1000;
 		Boolean GraphScroll = false;
-		if (DatapointCounter > GraphSize)
+		if (WaitToScroll > 0) {
+			WaitToScroll--;
+			Log.d(TAG, "Scrolling to end in : " + WaitToScroll);
+		}
+		else if (DatapointCounter > GraphSize - 30000) {
 			GraphScroll = true;
-		series.appendData(new DataPoint(x, y), GraphScroll, 1800);
+		}
+		series.appendData(new DataPoint(x, y), GraphScroll, GraphLength);
 	}
 }
