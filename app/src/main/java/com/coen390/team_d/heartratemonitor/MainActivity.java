@@ -59,15 +59,10 @@ public class MainActivity extends AppCompatActivity {
 	// TAG for logging to console
 	private boolean RemoteMonitoringFlag = true;
 	private static final String TAG = "MainActivity";
-	private long MAX_MINUTES = MILLISECONDS.convert(5,MINUTES);
-	private Date notificationDate;
 	private BluetoothAdapter _btAdapter = null;
 	private BTClient _bt;
 	private NewConnectedListener _NConnListener;
-	ZephyrProtocol _protocol;
-	
-	private ArrayList<Integer> heartRateRecentHistory;
-	private final static int AVG_HR_COUNT = 10;
+	//private final static int AVG_HR_COUNT = 10;
 	
 	private final int HEART_RATE = 0x100;
 	private final int INSTANT_SPEED = 0x101;
@@ -81,17 +76,17 @@ public class MainActivity extends AppCompatActivity {
 	private long graphEnd;
 	private int DatapointCounter;
 	private int WaitToScroll;
-	Paint paint = new Paint();
+	private Paint paint = new Paint();
 	private LineGraphSeries<DataPoint> series;
-	SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 	
 	//Fields for HRAverages()
 	private Queue<Integer> HRTenSecAvgData = new LinkedList();
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
 	private int TenSecTotal = 0;
 	private int OneMinTotal = 0;
-	float TenSecAvg;
-	float OneMinAvg;
+	private float TenSecAvg;
+	private float OneMinAvg;
 	private int MaxBPM = 200;
 	
 	@Override
@@ -99,8 +94,6 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 				
-		// Initialize heart rate history
-		heartRateRecentHistory = new ArrayList<>();
 		
 		//////////////////
 		// Set up Graph //
@@ -178,10 +171,6 @@ public class MainActivity extends AppCompatActivity {
 		////////////////////
 		
 		//Obtaining the handle to act on the CONNECT button
-		/*TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-		String ErrorText  = "Not Connected to HxM ! !";
-		tv.setText(ErrorText);*/
-		
 		Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
 		if (btnConnect != null)
 		{
@@ -230,72 +219,6 @@ public class MainActivity extends AppCompatActivity {
 				}
 			});
 		}
-		/*Obtaining the handle to act on the DISCONNECT button*/
-		/*Button btnDisconnect = (Button) findViewById(R.id.ButtonDisconnect);
-		if (btnDisconnect != null)
-		{
-			btnDisconnect.setOnClickListener(new View.OnClickListener() {
-				@Override
-				*//*Functionality to act if the button DISCONNECT is touched*//*
-				public void onClick(View v) {
-					*//*Reset the global variables*//*
-					TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-					String ErrorText  = "Disconnected from HxM!";
-					tv.setText(ErrorText);
-
-					*//*This disconnects listener from acting on received messages*//*
-					_bt.removeConnectedEventListener(_NConnListener);
-					*//*Close the communication with the device & throw an exception if failure*//*
-					_bt.Close();
-
-				}
-			});
-		}*/
-		
-		// At this point bluetooth should be available and enabled
-		// Attempt to find HxM monitor in paired devices
-		/*Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
-
-		String hxmMacId = null;
-
-		if (pairedDevices.size() > 0) {
-			// get name and address of each paired device
-			for (BluetoothDevice device : pairedDevices) {
-				String devName = device.getName();
-				String devAddr = device.getAddress();
-				String devClass = device.getBluetoothClass().toString();
-
-				Log.d(TAG, "name: " + devName + ", addr: " + devAddr + ", class: " + devClass);
-
-				if (devName.startsWith("HXM")) {
-					hxmMacId = devAddr;
-					break;
-				}
-			}
-		}
-
-
-		if (hxmMacId != null) {
-			BluetoothDevice hxmDevice = _btAdapter.getRemoteDevice(hxmMacId);
-			String hxmDeviceName = hxmDevice.getName();
-			_bt = new BTClient(_btAdapter, hxmMacId);
-			_NConnListener = new NewConnectedListener(Newhandler,Newhandler);
-			_bt.addConnectedEventListener(_NConnListener);
-
-			if (_bt.IsConnected()) {
-				_bt.start();
-				TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-				String errorText = "Connected to HxM " + hxmDeviceName;
-				tv.setText(errorText);
-			}
-			else {
-				TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-				String errorText = "Unable to connect to HxM";
-				tv.setText(errorText);
-			}
-		}*/
-		
-
 	}
 	
 	private void onClickAlertButton(View v) {
@@ -364,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
 		//need manual bounds for scrolling to function
 		// set manual Y bounds (Heart Rate)
 		graph.getViewport().setYAxisBoundsManual(true);
+		
 		// set manual x bounds to have nice steps
 		graph.getViewport().setXAxisBoundsManual(true);
 		graph.getViewport().setScrollable(true); // enables horizontal scrolling
@@ -549,33 +473,9 @@ public class MainActivity extends AppCompatActivity {
 		}
 	};
 	
-	//Function that allows the graph to be real-time updated
-	//Doesn't seem to be necessary
 	@Override
 	protected void onResume(){
 		super.onResume();
-		/*
-		//Thread in control of updating data series
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						//Calls function responsible for adding data to graph series
-						addEntry();
-					}
-				});
-				// sleep to slow down the add of entries.
-				try {
-					//Values are in milliseconds. This decides how often the graph is updated
-					//May need to change to suit our uses
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// manage error if need be...
-				}
-			}
-		}).start();*/
 	}
 	
 	private void HRAverages(int HR){
