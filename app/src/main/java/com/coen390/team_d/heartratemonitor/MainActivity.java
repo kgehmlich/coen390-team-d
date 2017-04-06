@@ -58,15 +58,10 @@ public class MainActivity extends AppCompatActivity {
 	// TAG for logging to console
 	private boolean RemoteMonitoringFlag = true;
 	private static final String TAG = "MainActivity";
-	private long MAX_MINUTES = MILLISECONDS.convert(5,MINUTES);
-	private Date notificationDate;
 	private BluetoothAdapter _btAdapter = null;
 	private BTClient _bt;
 	private NewConnectedListener _NConnListener;
-	ZephyrProtocol _protocol;
-	
-	private ArrayList<Integer> heartRateRecentHistory;
-	private final static int AVG_HR_COUNT = 10;
+	//private final static int AVG_HR_COUNT = 10;
 	
 	private final int HEART_RATE = 0x100;
 	private final int INSTANT_SPEED = 0x101;
@@ -80,15 +75,17 @@ public class MainActivity extends AppCompatActivity {
 	private long graphEnd;
 	private int DatapointCounter;
 	private int WaitToScroll;
-	Paint paint = new Paint();
+	private Paint paint = new Paint();
 	private LineGraphSeries<DataPoint> series;
-	SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 	
 	//Fields for HRAverages()
 	private Queue<Integer> HRTenSecAvgData = new LinkedList();
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
 	private int TenSecTotal = 0;
 	private int OneMinTotal = 0;
+	private float TenSecAvg;
+	private float OneMinAvg;
 	private int MaxBPM = 200;
 	
 	@Override
@@ -96,8 +93,6 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 				
-		// Initialize heart rate history
-		heartRateRecentHistory = new ArrayList<>();
 		
 		//////////////////
 		// Set up Graph //
@@ -156,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
 		////////////////////
 		
 		//Obtaining the handle to act on the CONNECT button
-		
 		Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
 		if (btnConnect != null)
 		{
@@ -166,52 +160,6 @@ public class MainActivity extends AppCompatActivity {
 				}
 			});
 		}
-
-		
-		// At this point bluetooth should be available and enabled
-		// Attempt to find HxM monitor in paired devices
-		/*Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
-
-		String hxmMacId = null;
-
-		if (pairedDevices.size() > 0) {
-			// get name and address of each paired device
-			for (BluetoothDevice device : pairedDevices) {
-				String devName = device.getName();
-				String devAddr = device.getAddress();
-				String devClass = device.getBluetoothClass().toString();
-
-				Log.d(TAG, "name: " + devName + ", addr: " + devAddr + ", class: " + devClass);
-
-				if (devName.startsWith("HXM")) {
-					hxmMacId = devAddr;
-					break;
-				}
-			}
-		}
-
-
-		if (hxmMacId != null) {
-			BluetoothDevice hxmDevice = _btAdapter.getRemoteDevice(hxmMacId);
-			String hxmDeviceName = hxmDevice.getName();
-			_bt = new BTClient(_btAdapter, hxmMacId);
-			_NConnListener = new NewConnectedListener(Newhandler,Newhandler);
-			_bt.addConnectedEventListener(_NConnListener);
-
-			if (_bt.IsConnected()) {
-				_bt.start();
-				TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-				String errorText = "Connected to HxM " + hxmDeviceName;
-				tv.setText(errorText);
-			}
-			else {
-				TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-				String errorText = "Unable to connect to HxM";
-				tv.setText(errorText);
-			}
-		}*/
-		
-
 	}
 
 
@@ -312,20 +260,7 @@ public class MainActivity extends AppCompatActivity {
 		// Send alert through AWS Dynamo DB
 		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
 		dbHelper.sendAlert(-1);
-		
-		// Send email
-		GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com","heartrate");
-		try {
-			
-			gMailSender.sendMail("Manual Notification",
-					"Manual Notification",
-					"coen390teamd@gmail.com",
-					"coen390teamd@gmail.com");
-		} catch (Exception e) {
-			Log.e("SendMail", e.getMessage(), e);
-		}
-		Toast toast = Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG);
-		toast.show();
+		Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG).show();
 	}
 	
 	/**
@@ -386,6 +321,7 @@ public class MainActivity extends AppCompatActivity {
 		//need manual bounds for scrolling to function
 		// set manual Y bounds (Heart Rate)
 		graph.getViewport().setYAxisBoundsManual(true);
+		
 		// set manual x bounds to have nice steps
 		graph.getViewport().setXAxisBoundsManual(true);
 		graph.getViewport().setScrollable(true); // enables horizontal scrolling
@@ -562,59 +498,7 @@ public class MainActivity extends AppCompatActivity {
 					addEntry((double) heartRateInt);
 					
 					if (RemoteMonitoringFlag){
-						// Store heart rate locally
-						heartRateRecentHistory.add(heartRateInt);
-						
-						float heartRateValue = Float.valueOf(HeartRatetext);
-						SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-						int age = prefs.getInt("age", 20);
-						
-						float maxHeartRate = (float)(208 - 0.7*age);
-						
-						if (heartRateValue > MaxBPM) {
-							boolean sendEmail = false;
-							if (notificationDate == null) {
-								long durationTime = Calendar.getInstance().getTimeInMillis();
-								sendEmail = true;
-							} else {
-								long durationTime = Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
-								if (durationTime > MAX_MINUTES) {
-									sendEmail = true;
-								}
-							}
-							if (sendEmail) {
-								
-								// Send alert to AWS server
-								AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-								dbHelper.sendAlert(heartRateInt);
-								
-							/*GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com", "heartrate");
-							try {
-								gMailSender.sendMail("Notification Max HeartRate",
-										"Current HeartRate " + HeartRatetext,
-										"coen390teamd@gmail.com",
-										"coen390teamd@gmail.com");
-							} catch (Exception e) {
-								Log.e("SendMail", e.getMessage(), e);
-							}*/
-							} else {
-								// Average and send to server once we have AVG_HR_COUNT heart rates logged
-								if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
-									int total = 0;
-									for (int hr : heartRateRecentHistory) {
-										total += hr;
-									}
-									int avg = total / heartRateRecentHistory.size();
-									
-									// Send to server
-									AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-									dbHelper.updateHeartRate(avg);
-									
-									// Reset local hr storage
-									heartRateRecentHistory.clear();
-								}
-							}
-						}
+						RemoteMonitoringUpdate(heartRateInt);
 					}
 					break;
 				default:
@@ -623,39 +507,13 @@ public class MainActivity extends AppCompatActivity {
 		}
 	};
 	
-	//Function that allows the graph to be real-time updated
-	//Doesn't seem to be necessary
 	@Override
 	protected void onResume(){
 		super.onResume();
-		/*
-		//Thread in control of updating data series
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						//Calls function responsible for adding data to graph series
-						addEntry();
-					}
-				});
-				// sleep to slow down the add of entries.
-				try {
-					//Values are in milliseconds. This decides how often the graph is updated
-					//May need to change to suit our uses
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// manage error if need be...
-				}
-			}
-		}).start();*/
 	}
 	
 	private void HRAverages(int HR){
 		TextView tv;
-		float TenSecAvg;
-		float OneMinAvg;
 		TenSecTotal += HR;
 		OneMinTotal += HR;
 		HRTenSecAvgData.add(HR);
@@ -720,7 +578,6 @@ public class MainActivity extends AppCompatActivity {
 		if (tv != null)tv.setText("Max HR: " + MaxBPM);
 		tv = (TextView)findViewById(R.id.HRPercent);
 		if (tv != null)tv.setText("%MaxHR: " + MaxHRPercent + "%");
-		
 		tv = (TextView)findViewById(R.id.HRZone);
 		if (tv != null)tv.setText(HRzone);
 		
@@ -739,5 +596,16 @@ public class MainActivity extends AppCompatActivity {
 			GraphScroll = true;
 		}
 		series.appendData(new DataPoint(x, y), GraphScroll, GraphLength);
+	}
+	
+	private void RemoteMonitoringUpdate(int HR){
+		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+
+		if (HR > MaxBPM)
+			dbHelper.sendAlert(HR);
+		else if (DatapointCounter % 10000 == 0) {
+			dbHelper.updateHeartRate((int)TenSecAvg);
+			Log.d(TAG, "AWSDatabase Updated with : " + TenSecAvg);
+		}
 	}
 }
