@@ -92,6 +92,20 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		
+		///////////////
+		// Set up UI //
+		///////////////
+		TextView tv;
+		tv = (TextView)findViewById(R.id.usernameTextview);
+		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+		String name = prefs.getString("name", null);
+		if (name != null)tv.setText(name);
+		
+		tv = (TextView)findViewById(R.id.userAge);
+		int age = prefs.getInt("age", 55);
+		tv.setText("Age: " + Integer.toString(age));
+		
 		//////////////////////////////
 		// Set up Monitoring Switch //
 		//////////////////////////////
@@ -400,6 +414,9 @@ public class MainActivity extends AppCompatActivity {
 		int age = prefs.getInt("age", 20);
 		MaxBPM = 208 - (7 * age /10);
 		Log.d(TAG, "MaxBPM set to : " + MaxBPM);
+		TextView tv;
+		tv = (TextView)findViewById(R.id.HRMax);
+		if (tv != null)tv.setText("MaxHR: " + MaxBPM + " BPM");
 	}
 	
 	private void goToTeamMonitoringActivity() {
@@ -584,9 +601,6 @@ public class MainActivity extends AppCompatActivity {
 				HRzone = "Rest";
 				break;
 		}
-		
-		tv = (TextView)findViewById(R.id.HRMax);
-		if (tv != null)tv.setText("Max HR: " + MaxBPM);
 		tv = (TextView)findViewById(R.id.HRPercent);
 		if (tv != null)tv.setText("%MaxHR: " + MaxHRPercent + "%");
 		tv = (TextView)findViewById(R.id.HRZone);
