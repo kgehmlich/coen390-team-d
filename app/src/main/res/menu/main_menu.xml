@@ -2,10 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:title="Toggle Remote Monitoring"
-          android:icon="@android:drawable/ic_menu_edit"
-          android:id="@+id/toggleMonitoring"
-          app:showAsAction="never"/>
 
     <item android:title="Team Monitoring Screen"
           android:id="@+id/teamMonitoring"

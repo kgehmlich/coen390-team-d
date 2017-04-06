@@ -10,12 +10,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 //Graph related imports
 import android.graphics.Color;
 import android.graphics.Paint;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -36,47 +40,52 @@ import android.widget.TextView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-import static java.util.concurrent.TimeUnit.*;
 
 import zephyr.android.HxMBT.BTClient;
-import zephyr.android.HxMBT.ZephyrProtocol;
+//import zephyr.android.HxMBT.ZephyrProtocol;
 
 
 public class MainActivity extends AppCompatActivity {
 	
 	// TAG for logging to console
 	private boolean RemoteMonitoringFlag = true;
+	private Context mContext = this;
 	private static final String TAG = "MainActivity";
-	private long MAX_MINUTES = MILLISECONDS.convert(5,MINUTES);
-	private Date notificationDate;
 	private BluetoothAdapter _btAdapter = null;
 	private BTClient _bt;
 	private NewConnectedListener _NConnListener;
-	ZephyrProtocol _protocol;
-	
-	private ArrayList<Integer> heartRateRecentHistory;
-	private final static int AVG_HR_COUNT = 10;
+	//private final static int AVG_HR_COUNT = 10;
 	
 	private final int HEART_RATE = 0x100;
 	private final int INSTANT_SPEED = 0x101;
-	
 	private final static int REQUEST_ENABLE_BT = 1;
+	
+	//Fields for Graph
+	private GraphView graph;
+	private final int GraphSize 	= 	360000; //Visible graph size, 6 mins, in ms
+	private final int GraphLength 	=	3600; //Total Graphed data length, 1 hour, in s
+	private long graphStart;
+	private long graphEnd;
+	private int DatapointCounter;
+	private int WaitToScroll;
+	private Paint paint = new Paint();
 	private LineGraphSeries<DataPoint> series;
+	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 	
 	//Fields for HRAverages()
 	private Queue<Integer> HRTenSecAvgData = new LinkedList();
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
 	private int TenSecTotal = 0;
 	private int OneMinTotal = 0;
-	private int MaxBPM;
-	
+	private float TenSecAvg;
+	private float OneMinAvg;
+	private int MaxBPM = 200;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,9 +93,52 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 		
 		
-		// Initialize heart rate history
-		heartRateRecentHistory = new ArrayList<>();
+		///////////////
+		// Set up UI //
+		///////////////
+		TextView tv;
+		tv = (TextView)findViewById(R.id.usernameTextview);
+		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+		String name = prefs.getString("name", null);
+		if (name != null)tv.setText(name);
 		
+		tv = (TextView)findViewById(R.id.userAge);
+		int age = prefs.getInt("age", 55);
+		tv.setText("Age: " + Integer.toString(age));
+		
+		//////////////////////////////
+		// Set up Monitoring Switch //
+		//////////////////////////////
+		
+		Switch MonitoringSwitch = (Switch) findViewById(R.id.MonitoringSwitch);
+		MonitoringSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				TextView tv;
+				tv = (TextView)findViewById(R.id.LineState);
+				if (isChecked) {
+					// The Switch is enabled
+					RemoteMonitoringFlag = true;
+					Toast.makeText(getApplicationContext(),"Monitoring is ON" ,Toast.LENGTH_LONG).show();
+					if (tv != null)tv.setText("Online");
+					if (tv != null)tv.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
+				} else {
+					// The Switch is disabled
+					RemoteMonitoringFlag = false;
+					Toast.makeText(getApplicationContext(),"Monitoring is OFF" ,Toast.LENGTH_LONG).show();
+					if (tv != null)tv.setText("Offline");
+					if (tv != null)tv.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
+				}
+			}
+		});
+		
+		//////////////////
+		// Set up Graph //
+		//////////////////
+		setupGraph();
+		//////////////////
+		// Set up MaxHR //
+		//////////////////
+		setupMaxHR();
 		
 		Button alertButton = (Button) findViewById(R.id.alertButton);
 		alertButton.setOnClickListener(new View.OnClickListener()
@@ -136,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
 		////////////////////
 		
 		//Obtaining the handle to act on the CONNECT button
-		
 		Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
 		if (btnConnect != null)
 		{
@@ -146,92 +197,14 @@ public class MainActivity extends AppCompatActivity {
 				}
 			});
 		}
-
-		
-		// At this point bluetooth should be available and enabled
-		// Attempt to find HxM monitor in paired devices
-		/*Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
-
-		String hxmMacId = null;
-
-		if (pairedDevices.size() > 0) {
-			// get name and address of each paired device
-			for (BluetoothDevice device : pairedDevices) {
-				String devName = device.getName();
-				String devAddr = device.getAddress();
-				String devClass = device.getBluetoothClass().toString();
-
-				Log.d(TAG, "name: " + devName + ", addr: " + devAddr + ", class: " + devClass);
-
-				if (devName.startsWith("HXM")) {
-					hxmMacId = devAddr;
-					break;
-				}
-			}
-		}
-
-
-		if (hxmMacId != null) {
-			BluetoothDevice hxmDevice = _btAdapter.getRemoteDevice(hxmMacId);
-			String hxmDeviceName = hxmDevice.getName();
-			_bt = new BTClient(_btAdapter, hxmMacId);
-			_NConnListener = new NewConnectedListener(Newhandler,Newhandler);
-			_bt.addConnectedEventListener(_NConnListener);
-
-			if (_bt.IsConnected()) {
-				_bt.start();
-				TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-				String errorText = "Connected to HxM " + hxmDeviceName;
-				tv.setText(errorText);
-			}
-			else {
-				TextView tv = (TextView) findViewById(R.id.labelStatusMsg);
-				String errorText = "Unable to connect to HxM";
-				tv.setText(errorText);
-			}
-		}*/
-
-		//Create graph
-		GraphView graph = (GraphView) findViewById(R.id.graph);
-		series = new LineGraphSeries<DataPoint>();
-		
-		//Set Graph Formatting
-		Paint paint = new Paint();
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(2);
-		paint.setColor(Color.RED);
-		series.setCustomPaint(paint);
-		series.setDrawDataPoints(true);
-		series.setDataPointsRadius(10);
-		//Method for displaying point information when a point is tapped
-		series.setOnDataPointTapListener(new OnDataPointTapListener() {
-			@Override
-			public void onTap(Series series, DataPointInterface dataPoint) {
-				Toast.makeText(getApplicationContext()," " + dataPoint,Toast.LENGTH_SHORT).show();
-			}
-		});
-		
-		//graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
-		graph.getGridLabelRenderer().setVerticalAxisTitle("Heart Rate");
-		
-		//need manual bounds for scrolling to function
-		// set manual Y bounds (Heart Rate)
-		graph.getViewport().setYAxisBoundsManual(true);
-		graph.getViewport().setMinY(0);
-		graph.getViewport().setMaxY(200);
-		
-		// set manual X bounds (Time points)
-		graph.getViewport().setXAxisBoundsManual(true);
-		graph.getViewport().setMinX(0);
-		graph.getViewport().setMaxX(20);
-		
-		graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-		graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
-		//Creates graph using series
-		graph.addSeries(series);
 	}
-
-
+	
+	@Override
+	protected void	onDestroy(){
+		super.onDestroy();
+		onClickDisconnectButton();
+	}
+	
     private void onClickConnectButton() {
 
         // Check for bluetooth and get adapter
@@ -283,6 +256,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (_bt.IsConnected()) {
             _bt.start();
+			
+			//Reset Graph X bounds
+			refreshGraphBounds();
 
             // Set button text to "Disconnect" and modify click listener
             Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
@@ -326,20 +302,7 @@ public class MainActivity extends AppCompatActivity {
 		// Send alert through AWS Dynamo DB
 		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
 		dbHelper.sendAlert(-1);
-		
-		// Send email
-		GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com","heartrate");
-		try {
-			
-			gMailSender.sendMail("Manual Notification",
-					"Manual Notification",
-					"coen390teamd@gmail.com",
-					"coen390teamd@gmail.com");
-		} catch (Exception e) {
-			Log.e("SendMail", e.getMessage(), e);
-		}
-		Toast toast = Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG);
-		toast.show();
+		Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG).show();
 	}
 	
 	/**
@@ -357,25 +320,8 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		TextView tv;
-		tv = (TextView)findViewById(R.id.LineState);
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
 		switch (item.getItemId()) {
-			case R.id.toggleMonitoring:
-				//TODO toggleMonitoring() function with visual feedback
-				if(RemoteMonitoringFlag) {
-					RemoteMonitoringFlag = false;
-					Toast.makeText(getApplicationContext(),"Monitoring is OFF" ,Toast.LENGTH_LONG).show();
-					if (tv != null)tv.setText("Offline");
-					if (tv != null)tv.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-				}
-				else {
-					RemoteMonitoringFlag = true;
-					Toast.makeText(getApplicationContext(),"Monitoring is ON" ,Toast.LENGTH_LONG).show();
-					if (tv != null)tv.setText("Online");
-					if (tv != null)tv.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
-				}
-				break;
 			case R.id.teamMonitoring:
 				goToTeamMonitoringActivity();
 				break;
@@ -386,6 +332,91 @@ public class MainActivity extends AppCompatActivity {
 				return super.onOptionsItemSelected(item);
 		}
 		return true;
+	}
+	
+	/////////////////
+	// Graph setup //
+	/////////////////
+	private void setupGraph(){
+		graph = (GraphView) findViewById(R.id.graph);
+		
+		graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
+		graph.getGridLabelRenderer().setVerticalAxisTitle("BPM");
+		
+		//need manual bounds for scrolling to function
+		// set manual Y bounds (Heart Rate)
+		graph.getViewport().setYAxisBoundsManual(true);
+		
+		// set manual x bounds to have nice steps
+		graph.getViewport().setXAxisBoundsManual(true);
+		graph.getViewport().setScrollable(true); // enables horizontal scrolling
+		graph.getViewport().setScalableY(false); // disables vertical zooming and scrolling
+		
+		//Setup data series
+		setupSeries();
+		graph.addSeries(series);
+		
+		// set date label formatter
+		graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, formatter));
+		graph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
+		
+		// as we use dates as labels, the human rounding to nice readable numbers
+		// is not necessary
+		graph.getGridLabelRenderer().setHumanRounding(false);
+		
+		graph.getViewport().setOnXAxisBoundsChangedListener(new Viewport.OnXAxisBoundsChangedListener() {
+			@Override
+			public void onXAxisBoundsChanged(double minX, double maxX, Reason reason) {
+				Log.d(TAG, "XAxis Bounds Changed : Waiting to scroll to end");
+				WaitToScroll = 3;
+			}
+		});
+		
+		refreshGraphBounds();
+		
+	}
+	
+	private void setupSeries(){
+		series = new LineGraphSeries<>();
+		//Set Graph Formatting
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(6);
+		paint.setColor(Color.RED);
+		series.setCustomPaint(paint);
+		series.setDrawDataPoints(true);
+		series.setDataPointsRadius(4);
+		//Method for displaying point information when a point is tapped
+		series.setOnDataPointTapListener(new OnDataPointTapListener() {
+			@Override
+			public void onTap(Series series, DataPointInterface dataPoint) {
+				Date d = new Date((long)dataPoint.getX());
+				Toast.makeText(getApplicationContext(), formatter.format(d) + " : " + (int) dataPoint.getY() + " BPM",Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+	private void refreshGraphBounds(){
+		Date d1 = new Date();
+		graphStart = d1.getTime()/120000*120000; //Rounds the bound to the 2 minutes
+		graphEnd = graphStart+GraphSize;
+		graph.getViewport().setMinX(graphStart);
+		graph.getViewport().setMaxX(graphEnd);
+		graph.getViewport().setMinY(30);
+		if (MaxBPM > 200)
+			graph.getViewport().setMaxY(MaxBPM);
+		else
+			graph.getViewport().setMaxY(200);
+	}
+	
+	private void setupMaxHR(){
+		
+		//TODO if MAXBPM!=null in SharedPref, MaxBPM = SharedPref.GetMAXBPM()
+		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+		int age = prefs.getInt("age", 20);
+		MaxBPM = 208 - (7 * age /10);
+		Log.d(TAG, "MaxBPM set to : " + MaxBPM);
+		TextView tv;
+		tv = (TextView)findViewById(R.id.HRMax);
+		if (tv != null)tv.setText("MaxHR: " + MaxBPM + " BPM");
 	}
 	
 	private void goToTeamMonitoringActivity() {
@@ -491,59 +522,11 @@ public class MainActivity extends AppCompatActivity {
 					HRAverages(heartRateInt);
 					//HR Zones Calculation and UI updates
 					HRZones(heartRateInt);
+					//Add an entry to the graph
+					addEntry((double) heartRateInt);
 					
 					if (RemoteMonitoringFlag){
-						// Store heart rate locally
-						heartRateRecentHistory.add(heartRateInt);
-						
-						float heartRateValue = Float.valueOf(HeartRatetext);
-						SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-						int age = prefs.getInt("age", 20);
-						float maxHeartRate = (float)(208 - 0.7*age);
-						if (heartRateValue > maxHeartRate) {
-							boolean sendEmail = false;
-							if (notificationDate == null) {
-								long durationTime = Calendar.getInstance().getTimeInMillis();
-								sendEmail = true;
-							} else {
-								long durationTime = Calendar.getInstance().getTimeInMillis() - notificationDate.getTime();
-								if (durationTime > MAX_MINUTES) {
-									sendEmail = true;
-								}
-							}
-							if (sendEmail) {
-								
-								// Send alert to AWS server
-								AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-								dbHelper.sendAlert(heartRateInt);
-								
-							/*GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com", "heartrate");
-							try {
-								gMailSender.sendMail("Notification Max HeartRate",
-										"Current HeartRate " + HeartRatetext,
-										"coen390teamd@gmail.com",
-										"coen390teamd@gmail.com");
-							} catch (Exception e) {
-								Log.e("SendMail", e.getMessage(), e);
-							}*/
-							} else {
-								// Average and send to server once we have AVG_HR_COUNT heart rates logged
-								if (heartRateRecentHistory.size() >= AVG_HR_COUNT) {
-									int total = 0;
-									for (int hr : heartRateRecentHistory) {
-										total += hr;
-									}
-									int avg = total / heartRateRecentHistory.size();
-									
-									// Send to server
-									AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-									dbHelper.updateHeartRate(avg);
-									
-									// Reset local hr storage
-									heartRateRecentHistory.clear();
-								}
-							}
-						}
+						RemoteMonitoringUpdate(heartRateInt);
 					}
 					break;
 				default:
@@ -552,37 +535,13 @@ public class MainActivity extends AppCompatActivity {
 		}
 	};
 	
-	//Function that allows the graph to be real-time updated
 	@Override
 	protected void onResume(){
 		super.onResume();
-		//Thread in control of updating data series
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						//Calls function responsible for adding data to graph series
-						addEntry();
-					}
-				});
-				// sleep to slow down the add of entries.
-				try {
-					//Values are in milliseconds. This decides how often the graph is updated
-					//May need to change to suit our uses
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// manage error if need be...
-				}
-			}
-		}).start();
 	}
 	
 	private void HRAverages(int HR){
 		TextView tv;
-		float TenSecAvg;
-		float OneMinAvg;
 		TenSecTotal += HR;
 		OneMinTotal += HR;
 		HRTenSecAvgData.add(HR);
@@ -615,13 +574,12 @@ public class MainActivity extends AppCompatActivity {
 		TextView tv;
 		int MaxHRPercent;
 		String HRzone = new String();
-		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-		int age = prefs.getInt("age", 20);
-		MaxBPM = 220-age;
 		
-		if (HR > MaxBPM)
+		if (HR > MaxBPM) {
 			MaxBPM = HR;
+		}
 		MaxHRPercent = HR*100/MaxBPM;
+		//TODO Set MAXBPM as SharedPref entry
 		
 		switch (MaxHRPercent/10){
 			case 9:
@@ -643,23 +601,36 @@ public class MainActivity extends AppCompatActivity {
 				HRzone = "Rest";
 				break;
 		}
-		
-		tv = (TextView)findViewById(R.id.HRMax);
-		if (tv != null)tv.setText("Max HR: " + MaxBPM);
 		tv = (TextView)findViewById(R.id.HRPercent);
 		if (tv != null)tv.setText("%MaxHR: " + MaxHRPercent + "%");
-		
 		tv = (TextView)findViewById(R.id.HRZone);
 		if (tv != null)tv.setText(HRzone);
 		
 	}
 	
 	// add data to graph
-	private void addEntry() {
-		// here, we choose to display max 30 points on the graph and we scroll to end
-		//TODO: needs proper inputs from AWS here
-		double x = 1;
-		double y = 1;
-		series.appendData(new DataPoint(x, y), true, 30);
+	private void addEntry(double y) {
+		Date x = new Date();
+		DatapointCounter += 1000;
+		Boolean GraphScroll = false;
+		if (WaitToScroll > 0) {
+			WaitToScroll--;
+			Log.d(TAG, "Scrolling to end in : " + WaitToScroll);
+		}
+		else if (DatapointCounter > GraphSize - 30000) {
+			GraphScroll = true;
+		}
+		series.appendData(new DataPoint(x, y), GraphScroll, GraphLength);
+	}
+	
+	private void RemoteMonitoringUpdate(int HR){
+		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
+
+		if (HR > MaxBPM)
+			dbHelper.sendAlert(HR);
+		else if (DatapointCounter % 10000 == 0) {
+			dbHelper.updateHeartRate((int)TenSecAvg);
+			Log.d(TAG, "AWSDatabase Updated with : " + TenSecAvg);
+		}
 	}
 }
