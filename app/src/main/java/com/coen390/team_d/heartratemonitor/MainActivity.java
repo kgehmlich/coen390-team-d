@@ -10,6 +10,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 //Graph related imports
@@ -38,25 +40,22 @@ import android.widget.TextView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-import static java.util.concurrent.TimeUnit.*;
 
 import zephyr.android.HxMBT.BTClient;
-import zephyr.android.HxMBT.ZephyrProtocol;
+//import zephyr.android.HxMBT.ZephyrProtocol;
 
 
 public class MainActivity extends AppCompatActivity {
 	
 	// TAG for logging to console
 	private boolean RemoteMonitoringFlag = true;
+	private Context mContext = this;
 	private static final String TAG = "MainActivity";
 	private BluetoothAdapter _btAdapter = null;
 	private BTClient _bt;
@@ -92,7 +91,31 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-				
+		
+		//////////////////////////////
+		// Set up Monitoring Switch //
+		//////////////////////////////
+		
+		Switch MonitoringSwitch = (Switch) findViewById(R.id.MonitoringSwitch);
+		MonitoringSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				TextView tv;
+				tv = (TextView)findViewById(R.id.LineState);
+				if (isChecked) {
+					// The Switch is enabled
+					RemoteMonitoringFlag = true;
+					Toast.makeText(getApplicationContext(),"Monitoring is ON" ,Toast.LENGTH_LONG).show();
+					if (tv != null)tv.setText("Online");
+					if (tv != null)tv.setTextColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
+				} else {
+					// The Switch is disabled
+					RemoteMonitoringFlag = false;
+					Toast.makeText(getApplicationContext(),"Monitoring is OFF" ,Toast.LENGTH_LONG).show();
+					if (tv != null)tv.setText("Offline");
+					if (tv != null)tv.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
+				}
+			}
+		});
 		
 		//////////////////
 		// Set up Graph //
@@ -283,25 +306,8 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		TextView tv;
-		tv = (TextView)findViewById(R.id.LineState);
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
 		switch (item.getItemId()) {
-			case R.id.toggleMonitoring:
-				//TODO toggleMonitoring() function with visual feedback
-				if(RemoteMonitoringFlag) {
-					RemoteMonitoringFlag = false;
-					Toast.makeText(getApplicationContext(),"Monitoring is OFF" ,Toast.LENGTH_LONG).show();
-					if (tv != null)tv.setText("Offline");
-					if (tv != null)tv.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-				}
-				else {
-					RemoteMonitoringFlag = true;
-					Toast.makeText(getApplicationContext(),"Monitoring is ON" ,Toast.LENGTH_LONG).show();
-					if (tv != null)tv.setText("Online");
-					if (tv != null)tv.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
-				}
-				break;
 			case R.id.teamMonitoring:
 				goToTeamMonitoringActivity();
 				break;
