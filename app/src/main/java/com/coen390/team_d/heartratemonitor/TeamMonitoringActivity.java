@@ -20,6 +20,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
@@ -40,7 +42,9 @@ import java.util.concurrent.RunnableFuture;
 
 public class TeamMonitoringActivity extends AppCompatActivity {
 
-  private LineGraphSeries<DataPoint> series;
+    private GraphView graph;
+
+    private LineGraphSeries<DataPoint> series;
 
 	private Handler updateHandler;
     private final static int UPDATE_DELAY_SECS = 10;
@@ -93,6 +97,26 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 
         updateHandler = new Handler();
         updateHandler.post(updateHeartRates);
+
+        graph = (GraphView) findViewById(R.id.graphTeam);
+
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(30);
+        graph.getViewport().setMaxY(250);
+
+        ListView lv = (ListView) findViewById(R.id.listView);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                HeartRatesDO item = (HeartRatesDO) parent.getItemAtPosition(position);
+
+                // Clear graph
+                graph.removeAllSeries();
+
+                // Add this user's data to graph
+                graph.addSeries(HeartRateLog.userHRLogs.get(item.getUserId()));
+            }
+        });
     }
 
 
@@ -102,7 +126,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
     }
 
 
-  /**
+    /**
 	 * Adds toolbar menu to this activity
 	 */
 	@Override
@@ -134,7 +158,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		startActivity(intent);
 	}
 
-  /*
+    /*
 	// Function that allows the graph to be real-time updated
 	@Override
 	protected void onResume(){
@@ -182,6 +206,12 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         protected Integer doInBackground(Void... voids) {
             AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
             hrList = dbHelper.getListOfHeartRates();
+
+            // add new heart rates to logs
+            for (HeartRatesDO hr : hrList) {
+                HeartRateLog.addHeartRate(hr);
+            }
+
             return 0;
         }
 
@@ -203,7 +233,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
                 hrListStrings.add(temp);
             }
 
-            ArrayAdapter adapter = new ArrayAdapter(TeamMonitoringActivity.this, android.R.layout.simple_expandable_list_item_1, hrListStrings) {
+            /*ArrayAdapter adapter = new ArrayAdapter(TeamMonitoringActivity.this, android.R.layout.simple_expandable_list_item_1, hrListStrings) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
                     View view = super.getView(position, convertView, parent);
@@ -214,8 +244,34 @@ public class TeamMonitoringActivity extends AppCompatActivity {
                     }
                     return view;
                 }
+            };*/
+
+            ArrayAdapter<HeartRatesDO> hrAdapter = new ArrayAdapter<HeartRatesDO>(TeamMonitoringActivity.this, android.R.layout.simple_expandable_list_item_1, hrList) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    TextView view = (TextView) super.getView(position, convertView, parent);
+                    if (hrList.get(position).getAlert()) {
+                        view.setBackgroundColor(Color.YELLOW);
+                    } else {
+                        view.setBackgroundColor(Color.WHITE);
+                    }
+
+                    HeartRatesDO item = getItem(position);
+
+                    String itemText = item.getUserId() + (item.getAge() == null ? "" : " (" + item.getAge().intValue() + ")") + "\t\t";
+
+                    if (item.getHeartRate() == -1) {
+                        itemText += "MANUAL ALERT";
+                    } else {
+                        itemText += item.getHeartRate().toString();
+                    }
+
+                    view.setText(itemText);
+                    return view;
+                }
             };
-            hrListView.setAdapter(adapter);
+
+            hrListView.setAdapter(hrAdapter);
         }
     }
 
