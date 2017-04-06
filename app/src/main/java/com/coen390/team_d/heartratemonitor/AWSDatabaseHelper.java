@@ -74,9 +74,10 @@ public class AWSDatabaseHelper {
             _item.setHeartRate(-1d);
         }
 
-        // Get the userID from SharedPrefs
+        // Get the userID and age from SharedPrefs
         SharedPreferences prefs = _context.getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
         _item.setUserId(prefs.getString("name", noNameString));
+        _item.setAge(Double.valueOf(prefs.getInt("age", 0)));
 
         Calendar calendar = Calendar.getInstance();
         java.util.Date now = calendar.getTime();

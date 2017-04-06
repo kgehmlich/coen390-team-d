@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
 			testBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					
-					for (int i = 300; i < 310; i++) {
+					for (int i = 100; i < 110; i++) {
 						Message text1 = Newhandler.obtainMessage(HEART_RATE);
 						Bundle b1 = new Bundle();
 						b1.putString("HeartRate", String.valueOf(i));
@@ -277,11 +277,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onClickDisconnectButton() {
-        /*This disconnects listener from acting on received messages*/
-        _bt.removeConnectedEventListener(_NConnListener);
 
-        /*Close the communication with the device & throw an exception if failure*/
-        _bt.Close();
+        if (_bt != null) {
+            /*This disconnects listener from acting on received messages*/
+            _bt.removeConnectedEventListener(_NConnListener);
+
+            /*Close the communication with the device & throw an exception if failure*/
+            _bt.Close();
+        }
+
 
         // Set button text to "Connect" and modify click listener
         Button btnConnect = (Button) findViewById(R.id.ButtonConnect);

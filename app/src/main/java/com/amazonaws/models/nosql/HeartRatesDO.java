@@ -15,6 +15,7 @@ import java.util.Set;
 
 public class HeartRatesDO {
     private String _userId;
+    private Double _age;
     private Boolean _alert;
     private Double _heartRate;
     private String _lastTimeStamp;
@@ -27,6 +28,14 @@ public class HeartRatesDO {
 
     public void setUserId(final String _userId) {
         this._userId = _userId;
+    }
+    @DynamoDBAttribute(attributeName = "age")
+    public Double getAge() {
+        return _age;
+    }
+
+    public void setAge(final Double _age) {
+        this._age = _age;
     }
     @DynamoDBAttribute(attributeName = "alert")
     public Boolean getAlert() {
