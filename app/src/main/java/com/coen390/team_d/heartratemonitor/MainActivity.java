@@ -161,8 +161,13 @@ public class MainActivity extends AppCompatActivity {
 			});
 		}
 	}
-
-
+	
+	@Override
+	protected void	onDestroy(){
+		super.onDestroy();
+		onClickDisconnectButton();
+	}
+	
     private void onClickConnectButton() {
 
         // Check for bluetooth and get adapter
