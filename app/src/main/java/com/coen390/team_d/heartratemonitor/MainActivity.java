@@ -303,20 +303,7 @@ public class MainActivity extends AppCompatActivity {
 		// Send alert through AWS Dynamo DB
 		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
 		dbHelper.sendAlert(-1);
-		
-		// Send email
-		GMailSender gMailSender = new GMailSender("coen390teamd@gmail.com","heartrate");
-		try {
-			
-			gMailSender.sendMail("Manual Notification",
-					"Manual Notification",
-					"coen390teamd@gmail.com",
-					"coen390teamd@gmail.com");
-		} catch (Exception e) {
-			Log.e("SendMail", e.getMessage(), e);
-		}
-		Toast toast = Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG);
-		toast.show();
+		Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG).show();
 	}
 	
 	/**
