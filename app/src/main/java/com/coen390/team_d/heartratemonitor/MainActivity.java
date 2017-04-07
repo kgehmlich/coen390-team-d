@@ -652,7 +652,12 @@ public class MainActivity extends AppCompatActivity {
 
 	private void logHeartRateToFile(int hr) {
         if (isExternalStorageWritable()) {
+            File logDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "heartrates");
             File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "heartrates/log.csv");
+
+            if (!logDir.mkdirs()) {
+                Log.e("Logging", "Unable to create directory");
+            }
 
             // create file if it doesn't exist
             if (!logFile.exists()) {
