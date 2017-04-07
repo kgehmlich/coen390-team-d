@@ -52,7 +52,7 @@ import zephyr.android.HxMBT.BTClient;
 
 
 public class MainActivity extends AppCompatActivity {
-	
+
 	// TAG for logging to console
 	private boolean RemoteMonitoringFlag = true;
 	private Context mContext = this;
@@ -61,11 +61,11 @@ public class MainActivity extends AppCompatActivity {
 	private BTClient _bt;
 	private NewConnectedListener _NConnListener;
 	//private final static int AVG_HR_COUNT = 10;
-	
+
 	private final int HEART_RATE = 0x100;
 	private final int INSTANT_SPEED = 0x101;
 	private final static int REQUEST_ENABLE_BT = 1;
-	
+
 	//Fields for Graph
 	private GraphView graph;
 	private final int GraphSize 	= 	360000; //Visible graph size, 6 mins, in ms
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 	private Paint paint = new Paint();
 	private LineGraphSeries<DataPoint> series;
 	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-	
+
 	//Fields for HRAverages()
 	private Queue<Integer> HRTenSecAvgData = new LinkedList();
 	private Queue<Integer> HROneMinAvgData = new LinkedList();
@@ -86,13 +86,13 @@ public class MainActivity extends AppCompatActivity {
 	private float TenSecAvg;
 	private float OneMinAvg;
 	private int MaxBPM = 200;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		
+
+
 		///////////////
 		// Set up UI //
 		///////////////
@@ -101,15 +101,15 @@ public class MainActivity extends AppCompatActivity {
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 		String name = prefs.getString("name", null);
 		if (name != null)tv.setText(name);
-		
+
 		tv = (TextView)findViewById(R.id.userAge);
 		int age = prefs.getInt("age", 55);
 		tv.setText("Age: " + Integer.toString(age));
-		
+
 		//////////////////////////////
 		// Set up Monitoring Switch //
 		//////////////////////////////
-		
+
 		Switch MonitoringSwitch = (Switch) findViewById(R.id.MonitoringSwitch);
 		MonitoringSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 		});
-		
+
 		//////////////////
 		// Set up Graph //
 		//////////////////
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 		// Set up MaxHR //
 		//////////////////
 		setupMaxHR();
-		
+
 		Button alertButton = (Button) findViewById(R.id.alertButton);
 		alertButton.setOnClickListener(new View.OnClickListener()
 		{
@@ -149,8 +149,8 @@ public class MainActivity extends AppCompatActivity {
 				onClickAlertButton(v);
 			}
 		});
-		
-		
+
+
 		///////////////////////////////
 		// Set up bluetooth receiver //
 		///////////////////////////////
@@ -162,16 +162,16 @@ public class MainActivity extends AppCompatActivity {
 		IntentFilter filter2 = new IntentFilter("android.bluetooth.device.action.BOND_STATE_CHANGED");
 		this.getApplicationContext().registerReceiver(new BTBondReceiver(), filter2);
 
-		
+
 		////////////////
 		// SIMULATION //
 		////////////////
-		
+
 		Button testBtn = (Button) findViewById(R.id.testButton);
 		if (testBtn != null) {
 			testBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					
+
 					for (int i = 100; i < 110; i++) {
 						Message text1 = Newhandler.obtainMessage(HEART_RATE);
 						Bundle b1 = new Bundle();
@@ -180,13 +180,13 @@ public class MainActivity extends AppCompatActivity {
 						Newhandler.sendMessage(text1);
 					}
 				}
-				
+
 			});
 		}
 		////////////////////
 		// END SIMULATION //
 		////////////////////
-		
+
 		//Obtaining the handle to act on the CONNECT button
 		Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
 		if (btnConnect != null)
@@ -198,13 +198,13 @@ public class MainActivity extends AppCompatActivity {
 			});
 		}
 	}
-	
+
 	@Override
 	protected void	onDestroy(){
 		super.onDestroy();
 		onClickDisconnectButton();
 	}
-	
+
     private void onClickConnectButton() {
 
         // Check for bluetooth and get adapter
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (_bt.IsConnected()) {
             _bt.start();
-			
+
 			//Reset Graph X bounds
 			refreshGraphBounds();
 
@@ -300,15 +300,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-	
+
 	private void onClickAlertButton(View v) {
-		
+
 		// Send alert through AWS Dynamo DB
 		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-		dbHelper.sendAlert(-1);
+		dbHelper.updateHeartRate(-1, true);
 		Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG).show();
 	}
-	
+
 	/**
 	 * Adds toolbar menu to this activity
 	 */
@@ -318,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
 		inflater.inflate(R.menu.main_menu, menu);
 		return true;
 	}
-	
+
 	/**
 	 * Handles menu item clicks
 	 */
@@ -337,37 +337,37 @@ public class MainActivity extends AppCompatActivity {
 		}
 		return true;
 	}
-	
+
 	/////////////////
 	// Graph setup //
 	/////////////////
 	private void setupGraph(){
 		graph = (GraphView) findViewById(R.id.graph);
-		
+
 		graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
 		graph.getGridLabelRenderer().setVerticalAxisTitle("BPM");
-		
+
 		//need manual bounds for scrolling to function
 		// set manual Y bounds (Heart Rate)
 		graph.getViewport().setYAxisBoundsManual(true);
-		
+
 		// set manual x bounds to have nice steps
 		graph.getViewport().setXAxisBoundsManual(true);
 		graph.getViewport().setScrollable(true); // enables horizontal scrolling
 		graph.getViewport().setScalableY(false); // disables vertical zooming and scrolling
-		
+
 		//Setup data series
 		setupSeries();
 		graph.addSeries(series);
-		
+
 		// set date label formatter
 		graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, formatter));
 		graph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
-		
+
 		// as we use dates as labels, the human rounding to nice readable numbers
 		// is not necessary
 		graph.getGridLabelRenderer().setHumanRounding(false);
-		
+
 		graph.getViewport().setOnXAxisBoundsChangedListener(new Viewport.OnXAxisBoundsChangedListener() {
 			@Override
 			public void onXAxisBoundsChanged(double minX, double maxX, Reason reason) {
@@ -375,11 +375,11 @@ public class MainActivity extends AppCompatActivity {
 				WaitToScroll = 3;
 			}
 		});
-		
+
 		refreshGraphBounds();
-		
+
 	}
-	
+
 	private void setupSeries(){
 		series = new LineGraphSeries<>();
 		//Set Graph Formatting
@@ -410,9 +410,9 @@ public class MainActivity extends AppCompatActivity {
 		else
 			graph.getViewport().setMaxY(200);
 	}
-	
+
 	private void setupMaxHR(){
-		
+
 		//TODO if MAXBPM!=null in SharedPref, MaxBPM = SharedPref.GetMAXBPM()
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 		int age = prefs.getInt("age", 20);
@@ -422,17 +422,17 @@ public class MainActivity extends AppCompatActivity {
 		tv = (TextView)findViewById(R.id.HRMax);
 		if (tv != null)tv.setText("MaxHR: " + MaxBPM + " BPM");
 	}
-	
+
 	private void goToTeamMonitoringActivity() {
 		Intent intent = new Intent(MainActivity.this, TeamMonitoringActivity.class);
 		startActivity(intent);
 	}
-	
+
 	private void goToSettingsActivity() {
 		Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
 		startActivity(intent);
 	}
-	
+
 	/**
 	 * Called when an activity that was created by this activity returns a result code
 	 * @param requestCode
@@ -440,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
 	 * @param data
 	 */
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		
+
 		// Is this being called after trying to enable bluetooth?
 		if (requestCode == REQUEST_ENABLE_BT) {
 			// If yes, check the result
@@ -453,8 +453,8 @@ public class MainActivity extends AppCompatActivity {
 			}
 		}
 	}
-	
-	
+
+
 	private void btAlertMsg() {
 		// Show alert then exit
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -468,10 +468,10 @@ public class MainActivity extends AppCompatActivity {
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
-	
-	
-	
-	
+
+
+
+
 	private class BTBondReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -507,7 +507,7 @@ public class MainActivity extends AppCompatActivity {
 			}
 		}
 	}
-	
+
 	final  Handler Newhandler = new Handler(){
 		public void handleMessage(Message msg)
 		{
@@ -521,14 +521,14 @@ public class MainActivity extends AppCompatActivity {
 					//System.out.println("Heart Rate Info is "+ HeartRatetext);
 					//Log.i(TAG, "Heart Rate: " + HeartRatetext);
 					if (tv != null)tv.setText("Heart Rate: " + HeartRatetext);
-					
+
 					//HR Averages calculation and UI Updates
 					HRAverages(heartRateInt);
 					//HR Zones Calculation and UI updates
 					HRZones(heartRateInt);
 					//Add an entry to the graph
 					addEntry((double) heartRateInt);
-					
+
 					if (RemoteMonitoringFlag){
 						RemoteMonitoringUpdate(heartRateInt);
 					}
@@ -538,19 +538,19 @@ public class MainActivity extends AppCompatActivity {
 			}
 		}
 	};
-	
+
 	@Override
 	protected void onResume(){
 		super.onResume();
 	}
-	
+
 	private void HRAverages(int HR){
 		TextView tv;
 		TenSecTotal += HR;
 		OneMinTotal += HR;
 		HRTenSecAvgData.add(HR);
 		HROneMinAvgData.add(HR);
-		
+
 		if (HROneMinAvgData.size() > 60){
 			OneMinTotal -= HROneMinAvgData.poll();
 			OneMinAvg = OneMinTotal/60;
@@ -558,7 +558,7 @@ public class MainActivity extends AppCompatActivity {
 		else {
 			OneMinAvg = OneMinTotal/HROneMinAvgData.size();
 		}
-		
+
 		if (HRTenSecAvgData.size() > 10){
 			TenSecTotal -= HRTenSecAvgData.poll();
 			TenSecAvg = TenSecTotal/10;
@@ -568,23 +568,23 @@ public class MainActivity extends AppCompatActivity {
 		}
 		tv = (TextView)findViewById(R.id.shortAvgBPMTextView);
 		if (tv != null)tv.setText("10s. Avg: " + TenSecAvg);
-		
+
 		tv = (TextView)findViewById(R.id.longAvgBPMTextView);
 		if (tv != null)tv.setText("1Min Avg: " + OneMinAvg);
-		
+
 	}
-	
+
 	private void HRZones(int HR){
 		TextView tv;
 		int MaxHRPercent;
 		String HRzone = new String();
-		
+
 		if (HR > MaxBPM) {
 			MaxBPM = HR;
 		}
 		MaxHRPercent = HR*100/MaxBPM;
 		//TODO Set MAXBPM as SharedPref entry
-		
+
 		switch (MaxHRPercent/10){
 			case 9:
 				HRzone = "VO2 Max";
@@ -609,9 +609,9 @@ public class MainActivity extends AppCompatActivity {
 		if (tv != null)tv.setText("%MaxHR: " + MaxHRPercent + "%");
 		tv = (TextView)findViewById(R.id.HRZone);
 		if (tv != null)tv.setText(HRzone);
-		
+
 	}
-	
+
 	// add data to graph
 	private void addEntry(double y) {
 		Date x = new Date();
@@ -626,14 +626,14 @@ public class MainActivity extends AppCompatActivity {
 		}
 		series.appendData(new DataPoint(x, y), GraphScroll, GraphLength);
 	}
-	
+
 	private void RemoteMonitoringUpdate(int HR){
 		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
 
 		if (HR > MaxBPM)
-			dbHelper.sendAlert(HR);
+			dbHelper.updateHeartRate(HR, true);
 		else if (DatapointCounter % 10000 == 0) {
-			dbHelper.updateHeartRate((int)TenSecAvg);
+			dbHelper.updateHeartRate((int)TenSecAvg, false);
 			Log.d(TAG, "AWSDatabase Updated with : " + TenSecAvg);
 		}
 	}
