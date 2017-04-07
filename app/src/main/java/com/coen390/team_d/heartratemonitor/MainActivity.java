@@ -2,6 +2,7 @@ package com.coen390.team_d.heartratemonitor;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import android.widget.Toast;
 //Graph related imports
 import android.graphics.Color;
 import android.graphics.Paint;
+
+import com.amazonaws.models.nosql.HeartRatesDO;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
@@ -38,9 +41,14 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -532,6 +540,9 @@ public class MainActivity extends AppCompatActivity {
 					if (RemoteMonitoringFlag){
 						RemoteMonitoringUpdate(heartRateInt);
 					}
+
+					logHeartRateToFile(heartRateInt);
+
 					break;
 				default:
 					break;
@@ -637,4 +648,50 @@ public class MainActivity extends AppCompatActivity {
 			Log.d(TAG, "AWSDatabase Updated with : " + TenSecAvg);
 		}
 	}
+
+
+	private void logHeartRateToFile(int hr) {
+        if (isExternalStorageWritable()) {
+            File logDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "heartrates");
+            File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "heartrates/log.csv");
+
+            if (!logDir.mkdirs()) {
+                Log.e("Logging", "Unable to create directory");
+            }
+
+            // create file if it doesn't exist
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            java.util.Date now = calendar.getTime();
+            java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+
+            String line = hr + "," + currentTimestamp.toString();
+
+            try {
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(line);
+                buf.newLine();
+                buf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
 }
