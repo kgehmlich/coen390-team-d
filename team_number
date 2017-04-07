@@ -1,0 +1,21 @@
+import android.content.Context;
+import android.content.SharedPreferences;
+
+public class SharedPreferenceHelper {
+    private SharedPreferences sharedPreferences;
+    public SharedPreferenceHelper(Context context) { sharedPreferences = context.getSharedPreferences("ProfilePreference",
+            Context.MODE_PRIVATE );
+    }
+	
+    public void saveProfileTeamNo(String Num)
+    {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("profileTeamNo",name);
+        editor.commit();
+	}
+	
+	 public String getProfileTeamNo()
+    {
+        return sharedPreferences.getString("profileTeamNo", null);
+    }
+}
