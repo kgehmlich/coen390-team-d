@@ -1,45 +1,36 @@
 package com.coen390.team_d.heartratemonitor;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 //Graph related imports
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
-import com.jjoe64.graphview.series.OnDataPointTapListener;
-import com.jjoe64.graphview.series.Series;
 
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.amazonaws.models.nosql.HeartRatesDO;
 
 import java.util.ArrayList;
-import java.util.concurrent.RunnableFuture;
 
 public class TeamMonitoringActivity extends AppCompatActivity {
 
+    private GraphView graph;
     private LineGraphSeries<DataPoint> series;
 
 	private Handler updateHandler;
@@ -93,6 +84,26 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 
         updateHandler = new Handler();
         updateHandler.post(updateHeartRates);
+
+        graph = (GraphView) findViewById(R.id.graphTeam);
+
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(30);
+        graph.getViewport().setMaxY(250);
+
+        ListView lv = (ListView) findViewById(R.id.listView);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                HeartRatesDO item = (HeartRatesDO) parent.getItemAtPosition(position);
+
+                // Clear graph
+                graph.removeAllSeries();
+
+                // Add this user's data to graph
+                graph.addSeries(HeartRateLog.userHRLogs.get(item.getUserId()));
+            }
+        });
     }
 
 
@@ -134,7 +145,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		startActivity(intent);
 	}
 
-  /*
+    /*
 	// Function that allows the graph to be real-time updated
 	@Override
 	protected void onResume(){
@@ -182,6 +193,12 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
             hrList = dbHelper.getListOfHeartRates();
+
+            // add new heart rates to logs
+            for (HeartRatesDO hr : hrList) {
+                HeartRateLog.addHeartRate(hr);
+            }
+
             return null;
         }
 
@@ -190,32 +207,32 @@ public class TeamMonitoringActivity extends AppCompatActivity {
             // populate list view with user heart rates
             ListView hrListView = (ListView) findViewById(R.id.listView);
 
-            ArrayList<String> hrListStrings = new ArrayList<>();
-
-            for (HeartRatesDO hr : hrList) {
-                String temp = hr.getUserId() + (hr.getAge() == null ? "" : " (" + hr.getAge().intValue() + ")") + "\t\t";
-
-                if (hr.getHeartRate() == -1) {
-                    temp += "MANUAL ALERT";
-                } else {
-                    temp += hr.getHeartRate().toString();
-                }
-                hrListStrings.add(temp);
-            }
-
-            ArrayAdapter adapter = new ArrayAdapter(TeamMonitoringActivity.this, android.R.layout.simple_expandable_list_item_1, hrListStrings) {
+            ArrayAdapter<HeartRatesDO> hrAdapter = new ArrayAdapter<HeartRatesDO>(TeamMonitoringActivity.this, android.R.layout.simple_expandable_list_item_1, hrList) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
-                    View view = super.getView(position, convertView, parent);
+                    TextView view = (TextView) super.getView(position, convertView, parent);
                     if (hrList.get(position).getAlert()) {
                         view.setBackgroundColor(Color.YELLOW);
                     } else {
                         view.setBackgroundColor(Color.WHITE);
                     }
+
+                    HeartRatesDO item = getItem(position);
+
+                    String itemText = item.getUserId() + (item.getAge() == null ? "" : " (" + item.getAge().intValue() + ")") + "\t\t";
+
+                    if (item.getHeartRate() == -1) {
+                        itemText += "MANUAL ALERT";
+                    } else {
+                        itemText += item.getHeartRate().toString();
+                    }
+
+                    view.setText(itemText);
                     return view;
                 }
             };
-            hrListView.setAdapter(adapter);
+
+            hrListView.setAdapter(hrAdapter);
         }
     }
 
