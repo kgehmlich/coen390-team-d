@@ -31,7 +31,6 @@ import java.util.ArrayList;
 public class TeamMonitoringActivity extends AppCompatActivity {
 
     private GraphView graph;
-
     private LineGraphSeries<DataPoint> series;
 
 	private Handler updateHandler;
@@ -41,7 +40,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_team_monitoring);
-		
+
 		/*
 		//Create graph
 		GraphView graph = (GraphView) findViewById(R.id.graphTeam);
@@ -183,15 +182,15 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		double x = 1;
 		double y = 1;
 		series.appendData(new DataPoint(x, y), true, 30);
-		
+
 	}*/
 
 
     // Class to asynchronously update the UI with data from server
-    private class FetchHeartRates extends AsyncTask<Void, Void, Integer> {
+    private class FetchHeartRates extends AsyncTask<Void, Void, Void> {
         private ArrayList<HeartRatesDO> hrList;
 
-        protected Integer doInBackground(Void... voids) {
+        protected Void doInBackground(Void... voids) {
             AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
             hrList = dbHelper.getListOfHeartRates();
 
@@ -200,10 +199,10 @@ public class TeamMonitoringActivity extends AppCompatActivity {
                 HeartRateLog.addHeartRate(hr);
             }
 
-            return 0;
+            return null;
         }
 
-        protected void onPostExecute(Integer integer) {
+        protected void onPostExecute(Void v) {
             Toast.makeText(getApplicationContext(), "Heart rates updated (" + hrList.size() + ")", Toast.LENGTH_LONG).show();
             // populate list view with user heart rates
             ListView hrListView = (ListView) findViewById(R.id.listView);
