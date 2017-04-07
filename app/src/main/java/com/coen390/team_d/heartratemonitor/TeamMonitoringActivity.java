@@ -1,10 +1,12 @@
 package com.coen390.team_d.heartratemonitor;
 
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,21 +20,37 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.amazonaws.models.nosql.HeartRatesDO;
+import com.jjoe64.graphview.series.OnDataPointTapListener;
+import com.jjoe64.graphview.series.Series;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class TeamMonitoringActivity extends AppCompatActivity {
-
-    private GraphView graph;
-
+	
+	// TAG for logging to console
+	private static final String TAG = "TeamMonitoringActivity";
+	private GraphView graph;
+	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
     private LineGraphSeries<DataPoint> series;
+	private int DatapointCounter;
+	private int WaitToScroll;
+	private final int GraphSize 	= 	360000; //Visible graph size, 6 mins, in ms
+	private final int GraphLength 	=	3600; //Total Graphed data length, 1 hour, in s
+	private long graphStart;
+	private long graphEnd;
+	private Paint paint = new Paint();
 
 	private Handler updateHandler;
     private final static int UPDATE_DELAY_SECS = 10;
@@ -90,7 +108,40 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 
         graph.getViewport().setYAxisBoundsManual(true);
         graph.getViewport().setMinY(30);
-        graph.getViewport().setMaxY(250);
+        graph.getViewport().setMaxY(220);
+		
+		
+		graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
+		graph.getGridLabelRenderer().setVerticalAxisTitle("BPM");
+		
+		//need manual bounds for scrolling to function
+		// set manual Y bounds (Heart Rate)
+		graph.getViewport().setYAxisBoundsManual(true);
+		
+		// set manual x bounds to have nice steps
+		graph.getViewport().setXAxisBoundsManual(true);
+		graph.getViewport().setScrollable(true); // enables horizontal scrolling
+		graph.getViewport().setScalableY(false); // disables vertical zooming and scrolling
+		
+		
+		// set date label formatter
+		graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, formatter));
+		graph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
+		
+		// as we use dates as labels, the human rounding to nice readable numbers
+		// is not necessary
+		graph.getGridLabelRenderer().setHumanRounding(false);
+		
+		graph.getViewport().setOnXAxisBoundsChangedListener(new Viewport.OnXAxisBoundsChangedListener() {
+			@Override
+			public void onXAxisBoundsChanged(double minX, double maxX, Reason reason) {
+				Log.d(TAG, "XAxis Bounds Changed : Waiting to scroll to end");
+				WaitToScroll = 1;
+			}
+		});
+		
+		refreshGraphBounds();
+		
 
         ListView lv = (ListView) findViewById(R.id.listView);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -100,12 +151,44 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 
                 // Clear graph
                 graph.removeAllSeries();
+				
+				series = HeartRateLog.userHRLogs.get(item.getUserId());
+				//Set Graph Formatting
+				paint.setStyle(Paint.Style.STROKE);
+				paint.setStrokeWidth(6);
+				paint.setColor(Color.RED);
+				series.setCustomPaint(paint);
+				series.setDrawDataPoints(true);
+				series.setDataPointsRadius(4);
+				//Method for displaying point information when a point is tapped
+				series.setOnDataPointTapListener(new OnDataPointTapListener() {
+					@Override
+					public void onTap(Series series, DataPointInterface dataPoint) {
+						Date d = new Date((long)dataPoint.getX());
+						Toast.makeText(getApplicationContext(), formatter.format(d) + " : " + (int) dataPoint.getY() + " BPM",Toast.LENGTH_SHORT).show();
+					}
+				});
 
                 // Add this user's data to graph
-                graph.addSeries(HeartRateLog.userHRLogs.get(item.getUserId()));
+                graph.addSeries(series);
             }
         });
     }
+    
+	private void refreshGraphBounds(){
+		Date d1 = new Date();
+		graphStart = d1.getTime()/120000*120000; //Rounds the bound to the 2 minutes
+		graphEnd = graphStart+GraphSize;
+		graph.getViewport().setMinX(graphStart);
+		graph.getViewport().setMaxX(graphEnd);
+		graph.getViewport().setMinY(30);
+		/*
+		if (MaxBPM > 200)
+			graph.getViewport().setMaxY(MaxBPM);
+		else
+			graph.getViewport().setMaxY(200);
+			 */
+	}
 
 
     public void onDestroy() {
@@ -194,10 +277,22 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         protected Integer doInBackground(Void... voids) {
             AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
             hrList = dbHelper.getListOfHeartRates();
+			DatapointCounter += 10000;
+			Boolean GraphScroll = false;
+			if (WaitToScroll > 0) {
+				WaitToScroll--;
+				Log.d(TAG, "Scrolling to end in : " + WaitToScroll);
+			}
+			else if (DatapointCounter > GraphSize - 30000) {
+				GraphScroll = true;
+			}
+			else
+				Log.d(TAG, "Scrolling to end when : " + DatapointCounter + " > " + GraphSize + " - 30000");
+				
 
             // add new heart rates to logs
             for (HeartRatesDO hr : hrList) {
-                HeartRateLog.addHeartRate(hr);
+                HeartRateLog.addHeartRate(hr,GraphScroll);
             }
 
             return 0;

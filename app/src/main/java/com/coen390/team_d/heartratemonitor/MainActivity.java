@@ -54,9 +54,9 @@ import zephyr.android.HxMBT.BTClient;
 public class MainActivity extends AppCompatActivity {
 	
 	// TAG for logging to console
+	private static final String TAG = "MainActivity";
 	private boolean RemoteMonitoringFlag = true;
 	private Context mContext = this;
-	private static final String TAG = "MainActivity";
 	private BluetoothAdapter _btAdapter = null;
 	private BTClient _bt;
 	private NewConnectedListener _NConnListener;

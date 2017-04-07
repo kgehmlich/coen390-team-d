@@ -18,7 +18,7 @@ public class HeartRateLog {
 
     public static HashMap<String, LineGraphSeries> userHRLogs = new HashMap<>();
 
-    public static void addHeartRate(HeartRatesDO newHR) {
+    public static void addHeartRate(HeartRatesDO newHR, boolean GraphScroll) {
         String userName = newHR.getUserId();
         Double heartRate = newHR.getHeartRate();
         Date timestamp = java.sql.Timestamp.valueOf(newHR.getLastTimeStamp());
@@ -29,6 +29,6 @@ public class HeartRateLog {
             userHRLogs.put(userName, new LineGraphSeries<>());
         }
 
-        userHRLogs.get(userName).appendData(new DataPoint(timestamp, heartRate.intValue()), true, 3600);
+        userHRLogs.get(userName).appendData(new DataPoint(timestamp, heartRate.intValue()), GraphScroll, 3600);
     }
 }
