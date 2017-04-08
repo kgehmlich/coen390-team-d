@@ -55,15 +55,31 @@ public class SettingsActivity extends AppCompatActivity {
     private void onClickSaveButton(View v) {
 
         //TODO Validate age and name edit text
+        String nameString = nameTextBox.getText().toString();
+        int age = Integer.valueOf(ageTextBox.getText().toString());
+
+        if (!nameString.matches("[A-Za-z]+([ -][A-Za-z]+)*")) {
+            nameTextBox.setError("Only letters, hyphens, and spaces are allowed. Must end with a letter.");
+            return;
+        }
+
+        if (nameString.length() > 25) {
+            nameTextBox.setError("Must be 25 characters or fewer.");
+            return;
+        }
+
+        if (age > 65 || age < 18) {
+            ageTextBox.setError("Must be between 18-65.");
+            return;
+        }
+
 
         SharedPreferences prefs =
                 getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
 
-        EditText ageText = (EditText) findViewById(R.id.ageEditText);
-        EditText nameText = (EditText) findViewById(R.id.nameEditText);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt("age", Integer.valueOf(ageText.getText().toString()));
-        editor.putString("name", nameText.getText().toString());
+        editor.putInt("age", age);
+        editor.putString("name", nameString);
         editor.commit();
 
         Toast.makeText(getApplicationContext(), "Profile saved", Toast.LENGTH_SHORT).show();
