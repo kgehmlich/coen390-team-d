@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     private int OneMinTotal = 0;
     private float TenSecAvg;
     private float OneMinAvg;
-    private int MaxBPM = 200;
+    private int MaxBPM = 220;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
         String name = prefs.getString("name", null);
         if (name != null) tv.setText(name);
-	
+
 		//////////////////////////////
 		// Set up Monitoring Switch //
 		//////////////////////////////
@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 		String name = prefs.getString("name", null);
 		if (name != null)tv.setText(name);
-		
+
 		tv = (TextView)findViewById(R.id.userAge);
 		int age = prefs.getInt("age", -1);
 		if (age != -1)tv.setText("Age: " + Integer.toString(age));
@@ -403,25 +403,25 @@ public class MainActivity extends AppCompatActivity {
 		else
 			graph.getViewport().setMaxY(200);
 	}
-	
+
 	private void CheckProfile(){
 		Log.d(TAG, "Checking if profile exists");
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-		
+
 		//Uncomment to clear SharedPreference content
 		//prefs.edit().clear().apply();
 		String name = prefs.getString("name", null);
 		int age = prefs.getInt("age", -1);
 		Log.d(TAG, "age: " + age);
 		Log.d(TAG, "name: " + name);
-		
+
 		if (name == null && age == -1) ShowPopup("No profile was found, please fill in your profile information");
 		else if (name == null) ShowPopup("No Name was found in your profile, please fill in your profile information");
 		else if (age == -1) ShowPopup("No age was found in your profile, please fill in your profile information");
-		
-		
+
+
 	}
-	
+
 	private void ShowPopup(String message){
 		Log.d(TAG, "New Popup " + message);
 		AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
@@ -434,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
 						goToSettingsActivity();
 					}
 				});
-		
+
 		// Remember, create doesn't show the dialog
 		AlertDialog helpDialog = helpBuilder.create();
 		helpDialog.show();
@@ -827,10 +827,16 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler simulationHandler;
     private static final int SIMULATION_DELAY_SECS = 1;
+    private int upperBound;
+    private int lowerBound;
 
     private void startSimulation() {
         // First, disconnect from bluetooth (don't want to mix simulation with real life)
         onClickDisconnectButton();
+
+        // set initial heart rate level
+        upperBound = 70;
+        lowerBound = 60;
 
         // Start simulation
         simulationHandler = new Handler();
@@ -845,7 +851,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             Random randGen = new Random();
-            int hrInt = 50 + randGen.nextInt(200);  // random heart rate between 50..250
+            int hrInt = lowerBound + randGen.nextInt(upperBound - lowerBound);  // random heart rate within current bounds
 
             // Use existing channels to send a new heart rate
             Message hrMsg = heartRateHandler.obtainMessage(HEART_RATE);
@@ -853,6 +859,12 @@ public class MainActivity extends AppCompatActivity {
             b.putString("HeartRate", String.valueOf(hrInt));
             hrMsg.setData(b);
             heartRateHandler.sendMessage(hrMsg);
+
+            // increase bounds (keep bounds stable when above 200)
+            if (lowerBound < 200) {
+                upperBound += 5;
+                lowerBound += 5;
+            }
 
             // Run again in 1 sec
             simulationHandler.postDelayed(simulateHeartRates, SIMULATION_DELAY_SECS * 1000);    // Times 1000 for milliseconds
