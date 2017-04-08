@@ -113,7 +113,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 
                 // Clear graph
                 graph.removeAllSeries();
-				
+
 				series = HeartRateLog.userHRLogs.get(item.getUserId());
 				//Set Graph Formatting
 				paint.setStyle(Paint.Style.STROKE);
@@ -254,7 +254,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Void v) {
-            Toast.makeText(getApplicationContext(), "Heart rates updated (" + hrList.size() + ")", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "Heart rates updated (" + hrList.size() + ")", Toast.LENGTH_LONG).show();
             int HR;
             if (item != null) {
                 HR = (int) (1 * HeartRateLog.userHRLogs.get(item.getUserId()).getHighestValueY());

@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     private int OneMinTotal = 0;
     private float TenSecAvg;
     private float OneMinAvg;
-    private int MaxBPM = 220;
+    private int MaxBPM = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -398,10 +398,10 @@ public class MainActivity extends AppCompatActivity {
 		graph.getViewport().setMinX(graphStart);
 		graph.getViewport().setMaxX(graphEnd);
 		graph.getViewport().setMinY(30);
-		if (MaxBPM > 200)
+		if (MaxBPM > 220)
 			graph.getViewport().setMaxY(MaxBPM);
 		else
-			graph.getViewport().setMaxY(200);
+			graph.getViewport().setMaxY(220);
 	}
 
 	private void CheckProfile(){
@@ -601,9 +601,6 @@ public class MainActivity extends AppCompatActivity {
         int MaxHRPercent;
         String HRzone = new String();
 
-        if (HR > MaxBPM) {
-            MaxBPM = HR;
-        }
         MaxHRPercent = HR * 100 / MaxBPM;
         //TODO Set MAXBPM as SharedPref entry
 
@@ -827,8 +824,10 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler simulationHandler;
     private static final int SIMULATION_DELAY_SECS = 1;
+
     private int upperBound;
     private int lowerBound;
+    private static final int INCREASE_RATE = 2;
 
     private void startSimulation() {
         // First, disconnect from bluetooth (don't want to mix simulation with real life)
@@ -862,8 +861,8 @@ public class MainActivity extends AppCompatActivity {
 
             // increase bounds (keep bounds stable when above 200)
             if (lowerBound < 200) {
-                upperBound += 5;
-                lowerBound += 5;
+                upperBound += INCREASE_RATE;
+                lowerBound += INCREASE_RATE;
             }
 
             // Run again in 1 sec
