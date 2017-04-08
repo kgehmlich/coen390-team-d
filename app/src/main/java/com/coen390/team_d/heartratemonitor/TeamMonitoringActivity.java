@@ -123,7 +123,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 				//Set Graph Formatting
 				paint.setStyle(Paint.Style.STROKE);
 				paint.setStrokeWidth(6);
-				paint.setColor(Color.RED);
+				paint.setColor(Color.GREEN);
 				series.setCustomPaint(paint);
 				series.setDrawDataPoints(true);
 				series.setDataPointsRadius(4);
