@@ -416,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
 		//TODO if MAXBPM!=null in SharedPref, MaxBPM = SharedPref.GetMAXBPM()
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 		int age = prefs.getInt("age", 20);
-		MaxBPM = 208 - (7 * age /10);
+		MaxBPM =  (int) (208 - 0.7 * age);
 		Log.d(TAG, "MaxBPM set to : " + MaxBPM);
 		TextView tv;
 		tv = (TextView)findViewById(R.id.HRMax);

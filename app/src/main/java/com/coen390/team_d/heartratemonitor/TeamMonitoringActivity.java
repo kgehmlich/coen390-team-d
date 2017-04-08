@@ -1,6 +1,8 @@
 package com.coen390.team_d.heartratemonitor;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -51,6 +53,9 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 	private long graphStart;
 	private long graphEnd;
 	private Paint paint = new Paint();
+	private int age;
+	private int MaxBPM;
+	HeartRatesDO item;
 
 	private Handler updateHandler;
     private final static int UPDATE_DELAY_SECS = 10;
@@ -60,46 +65,6 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_team_monitoring);
 		
-		/*
-		//Create graph
-		GraphView graph = (GraphView) findViewById(R.id.graphTeam);
-		series = new LineGraphSeries<DataPoint>();
-
-		//Set Graph Formatting
-		Paint paint = new Paint();
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(2);
-		paint.setColor(Color.RED);
-		series.setCustomPaint(paint);
-		series.setDrawDataPoints(true);
-		series.setDataPointsRadius(10);
-		//Method for displaying point information when a point is tapped
-		series.setOnDataPointTapListener(new OnDataPointTapListener() {
-			@Override
-			public void onTap(Series series, DataPointInterface dataPoint) {
-				Toast.makeText(getApplicationContext()," " + dataPoint,Toast.LENGTH_SHORT).show();
-			}
-		});
-
-		//graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
-		graph.getGridLabelRenderer().setVerticalAxisTitle("Heart Rate");
-
-		//need manual bounds for scrolling to function
-		// set manual Y bounds (Heart Rate)
-		graph.getViewport().setYAxisBoundsManual(true);
-		graph.getViewport().setMinY(0);
-		graph.getViewport().setMaxY(200);
-
-		// set manual X bounds (Time points)
-		graph.getViewport().setXAxisBoundsManual(true);
-		graph.getViewport().setMinX(0);
-		graph.getViewport().setMaxX(20);
-
-		graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-		graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
-		//Creates graph using series
-		graph.addSeries(series);
-		*/
 
         updateHandler = new Handler();
         updateHandler.post(updateHeartRates);
@@ -147,8 +112,10 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                HeartRatesDO item = (HeartRatesDO) parent.getItemAtPosition(position);
-
+                item = (HeartRatesDO) parent.getItemAtPosition(position);
+				
+				//TODO set TextViews with use info
+				
                 // Clear graph
                 graph.removeAllSeries();
 				
@@ -171,6 +138,37 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 
                 // Add this user's data to graph
                 graph.addSeries(series);
+				
+				///////////////
+				// Set up UI //
+				///////////////
+				TextView tv;
+				tv = (TextView)findViewById(R.id.usernameTextview);
+				String name = item.getUserId();
+				if (name != null)tv.setText(name);
+				
+				
+				
+				
+				double dHR = item.getHeartRate();
+				int HR = (int) dHR;
+				
+				tv = (TextView)findViewById(R.id.instantBPMTextView);
+				if (tv != null)tv.setText("Heart Rate: " + HR);
+				
+				if (item.getAge()!= null) {
+					age = (int) (1 * item.getAge());
+					MaxBPM = (int) (208 - 0.7 * age);
+					//HR Zones Calculation and UI updates
+					HRZones(HR, MaxBPM);
+					tv = (TextView)findViewById(R.id.userAge);
+					tv.setText("Age: " + age);
+					tv = (TextView)findViewById(R.id.HRMax);
+					if (tv != null)tv.setText("MaxHR: " + MaxBPM + " BPM");
+				}
+				
+				
+				
             }
         });
     }
@@ -188,6 +186,47 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		else
 			graph.getViewport().setMaxY(200);
 			 */
+	}
+	
+	
+	private void HRZones(int HR, int MaxBPM){
+		TextView tv;
+		int MaxHRPercent;
+		String HRzone = new String();
+		
+		MaxHRPercent = HR*100/MaxBPM;
+		//TODO Set MAXBPM as SharedPref entry
+		
+		switch (MaxHRPercent/10){
+			case 14:
+			case 13:
+			case 12:
+			case 11:
+			case 10:
+			case 9:
+				HRzone = "VO2 Max";
+				break;
+			case 8:
+				HRzone = "Anaerobic";
+				break;
+			case 7:
+				HRzone = "Aerobic";
+				break;
+			case 6:
+				HRzone = "W.Control";
+				break;
+			case 5:
+				HRzone = "Moderate";
+				break;
+			default:
+				HRzone = "Rest";
+				break;
+		}
+		tv = (TextView)findViewById(R.id.HRPercent);
+		if (tv != null)tv.setText("%MaxHR: " + MaxHRPercent + "%");
+		tv = (TextView)findViewById(R.id.HRZone);
+		if (tv != null)tv.setText(HRzone);
+		
 	}
 
 
@@ -229,47 +268,6 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 		startActivity(intent);
 	}
 
-    /*
-	// Function that allows the graph to be real-time updated
-	@Override
-	protected void onResume(){
-		super.onResume();
-		//Thread in control of updating data series
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						//Calls function responsible for adding data to graph series
-						addEntry();
-					}
-				});
-				// sleep to slow down the add of entries.
-				try {
-					//Values are in milliseconds. This decides how often the graph is updated
-					//May need to change to suit our uses
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// manage error if need be...
-				}
-			}
-		}).start();
-	}*/
-	//TODO: Might be possible to create some kind of multiplexer function to switch between user data
-	//TODO: Could also display multiple users at once
-	/*
-	// add data to graph
-	private void addEntry() {
-		// here, we choose to display max 30 points on the graph and we scroll to end
-		//TODO: needs proper inputs from AWS here.
-		double x = 1;
-		double y = 1;
-		series.appendData(new DataPoint(x, y), true, 30);
-		
-	}*/
-
-
     // Class to asynchronously update the UI with data from server
     private class FetchHeartRates extends AsyncTask<Void, Void, Integer> {
         private ArrayList<HeartRatesDO> hrList;
@@ -300,6 +298,15 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 
         protected void onPostExecute(Integer integer) {
             Toast.makeText(getApplicationContext(), "Heart rates updated (" + hrList.size() + ")", Toast.LENGTH_LONG).show();
+			int HR;
+			if ( item != null) {
+				HR = (int) (1 * HeartRateLog.userHRLogs.get(item.getUserId()).getHighestValueY());
+				TextView tv;
+				tv = (TextView)findViewById(R.id.instantBPMTextView);
+				if (tv != null)tv.setText("Heart Rate: " + HR);
+				//HR Zones Calculation and UI updates
+				HRZones(HR, MaxBPM);
+			}
             // populate list view with user heart rates
             ListView hrListView = (ListView) findViewById(R.id.listView);
 
