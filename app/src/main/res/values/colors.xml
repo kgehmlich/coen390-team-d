@@ -4,6 +4,7 @@
     <color name="colorPrimary">#00a859</color>
     <!--<color name="colorPrimaryDark">#D32F2F</color>-->
     <color name="colorPrimaryDark">#00a859</color>
+    <color name="colorRED">#F44336</color>
     <color name="colorAccent">#9E9E9E</color>
     <color name="colorPrimaryLight">#FFCDD2</color>
     <color name="colorPrimaryText">#212121</color>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -12,89 +13,123 @@ import android.widget.Button;
 import android.widget.EditText;
 
 //Graph related imports
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.DataPointInterface;
-import com.jjoe64.graphview.series.LineGraphSeries;
-import com.jjoe64.graphview.series.OnDataPointTapListener;
-import com.jjoe64.graphview.series.Series;
-
 public class SettingsActivity extends AppCompatActivity {
-
-	private LineGraphSeries<DataPoint> series;
+	
+	private static final String TAG = "SettingsActivity";
+	protected EditText nameEditText;
+	protected EditText ageEditText;
+	protected TextView nameState;
+	protected TextView ageState;
+	protected boolean editFlag = false;
+	protected Button btnSaveSetting;
+	protected Button cancelButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
-
-		//Create graph
-		GraphView graph = (GraphView) findViewById(R.id.graphSet);
-		series = new LineGraphSeries<DataPoint>();
-
-		//Set Graph Formatting
-		Paint paint = new Paint();
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(2);
-		paint.setColor(Color.RED);
-		series.setCustomPaint(paint);
-		series.setDrawDataPoints(true);
-		series.setDataPointsRadius(10);
-		//Method for displaying point information when a point is tapped
-		series.setOnDataPointTapListener(new OnDataPointTapListener() {
-			@Override
-			public void onTap(Series series, DataPointInterface dataPoint) {
-				Toast.makeText(getApplicationContext()," " + dataPoint,Toast.LENGTH_SHORT).show();
-			}
-		});
-
-		//graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
-		graph.getGridLabelRenderer().setVerticalAxisTitle("Heart Rate");
-
-		//need manual bounds for scrolling to function
-		// set manual Y bounds (Heart Rate)
-		graph.getViewport().setYAxisBoundsManual(true);
-		graph.getViewport().setMinY(0);
-		graph.getViewport().setMaxY(200);
-
-		// set manual X bounds (Time points)
-		graph.getViewport().setXAxisBoundsManual(true);
-		graph.getViewport().setMinX(0);
-		graph.getViewport().setMaxX(20);
-
-		graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-		graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
-		//Creates graph using series
-		graph.addSeries(series);
-
-		Button btnSaveSetting =(Button)findViewById(R.id.profileSaveButton);
+		nameEditText = (EditText) findViewById(R.id.nameEditText);
+		ageEditText = (EditText) findViewById(R.id.ageEditText);
+		nameState = (TextView) findViewById(R.id.nameState);
+		ageState = (TextView) findViewById(R.id.ageState);
+		btnSaveSetting =(Button)findViewById(R.id.profileSaveButton);
+		cancelButton =(Button)findViewById(R.id.cancelButton);
+		nameEditText.setFocusable(false);
+		ageEditText.setFocusable(false);
+		btnSaveSetting.setVisibility(View.INVISIBLE);
+		cancelButton.setVisibility(View.INVISIBLE);
+		populateFields();
+		Log.d(TAG, "onCreate()");
+		populateFields();
+		
+		
 		btnSaveSetting.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
-				onClickSaveButton(v);
+				if (onClickSaveButton(v)){
+					finish();
+				}
+				
+			}
+		});
+		
+		cancelButton.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				finish();
 			}
 		});
 	}
+	
+	//Repopulate the fields with the data saved in the SharedPreference, or clear them if no saved data
+	void populateFields(){
+		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+		String name = prefs.getString("name", null);
+		int age = prefs.getInt("age", -1);
+		
+		if(name != null) {
+			nameEditText.setText(name);
+		}
+		else{
+			nameEditText.setText("");
+		}
+		if(age != -1) {
+			ageEditText.setText(Integer.toString(age));
+		}
+		else{
+			ageEditText.setText("");
+		}
+	}
 
-	private void onClickSaveButton(View v) {
-
-		//TODO Validate age and name edit text
-
+	private boolean onClickSaveButton(View v) {
 		SharedPreferences prefs =
 				getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
-
-		EditText ageText =(EditText)findViewById(R.id.ageEditText);
-		EditText nameText =(EditText)findViewById(R.id.nameEditText);
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.putInt("age", Integer.valueOf(ageText.getText().toString()));
-		editor.putString("name", nameText.getText().toString());
+		int age;
+		boolean checkFlag = true;
+		if (nameEditText.getText().toString().trim().isEmpty()){
+			nameState.setText("No input");
+			checkFlag = false;
+		}
+		else {
+			nameState.setText("");
+			editor.putString("name", nameEditText.getText().toString());
+		}
+		if (ageEditText.getText().toString().trim().isEmpty()){
+			ageState.setText("No input");
+			checkFlag = false;
+		}
+		
+		else {
+			age = Integer.parseInt(ageEditText.getText().toString().trim());
+			if (age<18 || age>65){
+				ageState.setText("Invalid");
+				checkFlag = false;
+			}
+			else{
+				ageState.setText("");
+				editor.putInt("age", age);
+			}
+		}
+		
 		editor.commit();
+		if (checkFlag) {
+			Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show();
+			populateFields();
+		}
+		else
+		{
+			Toast toast = Toast.makeText(this, "Invalid profile input", Toast.LENGTH_SHORT);
+			toast.show();
+		}
+		return checkFlag;
 	}
 
 	/**
@@ -116,48 +151,35 @@ public class SettingsActivity extends AppCompatActivity {
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
 		switch (item.getItemId()) {
 			case R.id.enableEdit:
-				//TODO enableEdit() function
+				// User chose the "Edit" item, make fields editable...
+				if (!editFlag)
+					toggleEditable();
 				break;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
 		return true;
 	}
-	//Function that allows the graph to be real-time updated
-	//TODO: May need to be altered or triggered for use with calibration function
-	@Override
-	protected void onResume(){
-		super.onResume();
-		//Thread in control of updating data series
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						//Calls function responsible for adding data to graph series
-						addEntry();
-					}
-				});
-				// sleep to slow down the add of entries.
-				try {
-					//Values are in milliseconds. This decides how often the graph is updated
-					//May need to change to suit our uses
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// manage error if need be...
-				}
-			}
-		}).start();
+	//Toggle the editability of the fields and the visibility of the save, cancel & edit buttons
+	void toggleEditable(){
+		//if editflag = true, content was editable, will switch to uneditable
+		if (editFlag){
+			nameEditText.setFocusable(false);
+			ageEditText.setFocusable(false);
+			editFlag = false;
+			btnSaveSetting.setVisibility(View.INVISIBLE);
+			cancelButton.setVisibility(View.INVISIBLE);
+			populateFields();
+			finish();
+		}
+		//if editflag = false, content was not editable, will switch to editable
+		else {
+			nameEditText.setFocusableInTouchMode(true);
+			ageEditText.setFocusableInTouchMode(true);
+			editFlag = true;
+			btnSaveSetting.setVisibility(View.VISIBLE);
+			cancelButton.setVisibility(View.VISIBLE);
+		}
+		invalidateOptionsMenu();
 	}
-
-	// add data to graph
-	private void addEntry() {
-		// here, we choose to display max 30 points on the graph and we scroll to end
-		//TODO: needs proper inputs from AWS here
-		double x = 1;
-		double y = 1;
-		series.appendData(new DataPoint(x, y), true, 30);
-	}
-	
 }
