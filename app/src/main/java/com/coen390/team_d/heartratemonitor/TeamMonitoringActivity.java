@@ -118,23 +118,23 @@ public class TeamMonitoringActivity extends AppCompatActivity {
 
                 // Clear graph
                 graph.removeAllSeries();
-
-                series = HeartRateLog.userHRLogs.get(item.getUserId());
-                //Set Graph Formatting
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(6);
-                paint.setColor(Color.RED);
-                series.setCustomPaint(paint);
-                series.setDrawDataPoints(true);
-                series.setDataPointsRadius(4);
-                //Method for displaying point information when a point is tapped
-                series.setOnDataPointTapListener(new OnDataPointTapListener() {
-                    @Override
-                    public void onTap(Series series, DataPointInterface dataPoint) {
-                        Date d = new Date((long) dataPoint.getX());
-                        Toast.makeText(getApplicationContext(), formatter.format(d) + " : " + (int) dataPoint.getY() + " BPM", Toast.LENGTH_SHORT).show();
-                    }
-                });
+				
+				series = HeartRateLog.userHRLogs.get(item.getUserId());
+				//Set Graph Formatting
+				paint.setStyle(Paint.Style.STROKE);
+				paint.setStrokeWidth(6);
+				paint.setColor(Color.GREEN);
+				series.setCustomPaint(paint);
+				series.setDrawDataPoints(true);
+				series.setDataPointsRadius(4);
+				//Method for displaying point information when a point is tapped
+				series.setOnDataPointTapListener(new OnDataPointTapListener() {
+					@Override
+					public void onTap(Series series, DataPointInterface dataPoint) {
+						Date d = new Date((long)dataPoint.getX());
+						Toast.makeText(getApplicationContext(), formatter.format(d) + " : " + (int) dataPoint.getY() + " BPM",Toast.LENGTH_SHORT).show();
+					}
+				});
 
                 // Add this user's data to graph
                 graph.addSeries(series);

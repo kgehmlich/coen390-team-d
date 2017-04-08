@@ -7,37 +7,106 @@
     android:layout_height="match_parent"
     tools:context="com.coen390.team_d.heartratemonitor.SettingsActivity">
 
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="5dp"
+        android:focusable="true"
+        android:text="Name: "
+        android:textColor="@color/colorPrimaryText"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/nameEditText"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/nameEditText"
+        app:layout_constraintTop_toTopOf="@+id/nameEditText"/>
+  
     <EditText
         android:id="@+id/nameEditText"
-        android:hint="Name"
+        android:hint="Type here"
         android:inputType="textPersonName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -"
         android:ems="10"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="0dp"
+        android:layout_marginStart="0dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/name"
         android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/nameState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:focusable="true"
+        android:text=""
+        android:gravity="end"
+        android:textColor="@color/colorRED"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/nameEditText"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toTopOf="@+id/nameEditText"
+        app:layout_constraintBottom_toBottomOf="@+id/nameEditText"  />
+
+    <TextView
+        android:id="@+id/age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:text="Age: "
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/colorPrimaryText"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        app:layout_constraintTop_toTopOf="@+id/ageEditText"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="5dp"
+        app:layout_constraintLeft_toRightOf="@+id/nameEditText"
+        app:layout_constraintBottom_toBottomOf="@+id/ageEditText"
+        android:layout_marginBottom="8dp"/>
 
     <EditText
         android:id="@+id/ageEditText"
-        android:hint="Age"
-        android:inputType="number"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:ems="10"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/nameEditText"
         android:layout_alignEnd="@+id/nameEditText"
-        android:layout_marginTop="15dp"
-        app:layout_constraintTop_toBottomOf="@+id/nameEditText"
+        android:layout_below="@+id/nameEditText"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:hint="Type here"
+        android:inputType="number"
+        app:layout_constraintLeft_toLeftOf="@+id/nameEditText"
+        app:layout_constraintTop_toBottomOf="@+id/nameEditText"/>
+
+    <TextView
+        android:id="@+id/ageState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:focusable="true"
+        android:text=""
+        android:gravity="end"
+        android:textColor="@color/colorRED"
+        android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="16dp" />
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/ageEditText"
+        app:layout_constraintTop_toTopOf="@+id/ageEditText"
+        app:layout_constraintBottom_toBottomOf="@+id/ageEditText" />
+
 
     <Button
         android:text="Save Profile"
@@ -51,9 +120,26 @@
         android:paddingStart="8dp"
         android:layout_marginStart="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="15dp"
+        app:layout_constraintRight_toLeftOf="@+id/cancelButton"
+        android:layout_marginTop="32dp"
         app:layout_constraintTop_toBottomOf="@+id/ageEditText"
         android:layout_marginLeft="16dp"/>
 
+    <Button
+        android:text="Cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/cancelButton"
+        android:visibility="visible"
+        android:onClick="profileSaveButtonClick"
+        android:background="@color/colorAccent"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/profileSaveButton"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@+id/ageEditText"
+        android:layout_marginLeft="8dp"/>
 
 </android.support.constraint.ConstraintLayout>
