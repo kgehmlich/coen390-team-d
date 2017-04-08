@@ -2,6 +2,7 @@ package com.coen390.team_d.heartratemonitor;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -60,6 +61,8 @@ import zephyr.android.HxMBT.BTClient;
 
 
 public class MainActivity extends AppCompatActivity {
+
+  private Button btnConnect;
 
 	// TAG for logging to console
 	private static final String TAG = "MainActivity";
@@ -195,8 +198,11 @@ public class MainActivity extends AppCompatActivity {
 		// END SIMULATION //
 		////////////////////
 
-		//Obtaining the handle to act on the CONNECT button
-		Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
+
+        // ***************************************************
+		// Obtaining the handle to act on the CONNECT button
+        // ***************************************************
+		btnConnect = (Button) findViewById(R.id.ButtonConnect);
 		if (btnConnect != null)
 		{
 			btnConnect.setOnClickListener(new View.OnClickListener() {
@@ -214,74 +220,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
     private void onClickConnectButton() {
-
-        // Check for bluetooth and get adapter
-        _btAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        // Does this device support bluetooth?
-        if (_btAdapter == null) {
-            // If bluetooth is not supported, show alert and return
-            btAlertMsg();
-            return;
-        }
-
-        // Is bluetooth enabled?
-        if (!_btAdapter.isEnabled()) {
-            // If not, ask user to enable it
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            return;
-        }
-
-
-        String BhMacID = "00:07:80:9D:8A:E8";
-        //String BhMacID = "00:07:80:88:F6:BF";
-        _btAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
-
-        if (pairedDevices.size() > 0)
-        {
-            for (BluetoothDevice device : pairedDevices)
-            {
-                if (device.getName().startsWith("HXM"))
-                {
-                    BhMacID = device.getAddress();
-                    break;
-
-                }
-            }
-
-
-        }
-
-        _bt = new BTClient(_btAdapter, BhMacID);
-        _NConnListener = new NewConnectedListener(Newhandler,Newhandler);
-        _bt.addConnectedEventListener(_NConnListener);
-
-//        TextView tv1 = (TextView)findViewById(R.id.instantBPMTextView);
-//        tv1.setText("Heart Rate: 000");
-
-        if (_bt.IsConnected()) {
-            _bt.start();
-
-			//Reset Graph X bounds
-			refreshGraphBounds();
-
-            // Set button text to "Disconnect" and modify click listener
-            Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
-            if (btnConnect != null) {
-                btnConnect.setText("Disconnect");
-                btnConnect.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        onClickDisconnectButton();
-                    }
-                });
-            }
-        } else {
-            // Show toast "Unable to connect to Bluetooth device"
-            Toast.makeText(getApplicationContext(), "Unable to connect to Bluetooth device", Toast.LENGTH_LONG).show();
-        }
+        new BluetoothAsyncConnector().execute();
     }
 
     private void onClickDisconnectButton() {
@@ -296,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Set button text to "Connect" and modify click listener
-        Button btnConnect = (Button) findViewById(R.id.ButtonConnect);
+        btnConnect = (Button) findViewById(R.id.ButtonConnect);
         if (btnConnect != null)
         {
             btnConnect.setText("Connect");
@@ -650,6 +589,122 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 
+    private class BluetoothAsyncConnector extends AsyncTask<Void, Void, Integer> {
+
+        private final int BLUETOOTH_NOT_SUPPORTED = 1;
+        private final int BLUETOOTH_NOT_ENABLED = 2;
+        private final int BLUETOOTH_NOT_CONNECTED = 3;
+        private final int BLUETOOTH_CONNECTED = 4;
+        private final int DEVICE_NOT_PAIRED = 5;
+
+        protected void onPreExecute() {
+            btnConnect.setEnabled(false);
+            btnConnect.setText("Connecting...");
+            btnConnect.setTextColor(Color.GRAY);
+        }
+
+        protected Integer doInBackground(Void... voids) {
+
+            // Check for bluetooth and get adapter
+            _btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            // Does this device support bluetooth?
+            if (_btAdapter == null) {
+                return BLUETOOTH_NOT_SUPPORTED;
+            }
+
+            // Is bluetooth enabled?
+            if (!_btAdapter.isEnabled()) {
+                return BLUETOOTH_NOT_ENABLED;
+            }
+
+
+            String BhMacID = null;
+            _btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            Set<BluetoothDevice> pairedDevices = _btAdapter.getBondedDevices();
+
+            if (pairedDevices.size() > 0)
+            {
+                for (BluetoothDevice device : pairedDevices)
+                {
+                    if (device.getName().startsWith("HXM"))
+                    {
+                        BhMacID = device.getAddress();
+                        break;
+
+                    }
+                }
+            }
+
+            if (BhMacID == null) {
+                return DEVICE_NOT_PAIRED;
+            }
+
+            _bt = new BTClient(_btAdapter, BhMacID);
+            _NConnListener = new NewConnectedListener(Newhandler,Newhandler);
+            _bt.addConnectedEventListener(_NConnListener);
+
+
+            if (_bt.IsConnected()) {
+                _bt.start();
+                return BLUETOOTH_CONNECTED;
+
+            } else {
+                return BLUETOOTH_NOT_CONNECTED;
+            }
+        }
+
+        protected void onPostExecute(Integer bluetoothStatus) {
+
+            switch (bluetoothStatus) {
+                case BLUETOOTH_NOT_SUPPORTED:
+                    // If bluetooth is not supported, show alert and return
+                    btAlertMsg();
+                    break;
+
+                case BLUETOOTH_NOT_ENABLED:
+                    // If not, ask user to enable it
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                    break;
+
+                case BLUETOOTH_NOT_CONNECTED:
+                    // Show toast "Unable to connect to Bluetooth device"
+                    Toast.makeText(getApplicationContext(), "Unable to connect to Bluetooth device", Toast.LENGTH_LONG).show();
+                    break;
+
+                case BLUETOOTH_CONNECTED:
+                    //Reset Graph X bounds
+                    refreshGraphBounds();
+
+                    // Set button text to "Disconnect" and modify click listener
+                    btnConnect = (Button) findViewById(R.id.ButtonConnect);
+                    if (btnConnect != null) {
+                        btnConnect.setText("Disconnect");
+                        btnConnect.setOnClickListener(new View.OnClickListener() {
+                            public void onClick(View v) {
+                                onClickDisconnectButton();
+                            }
+                        });
+                    }
+                    break;
+
+                case DEVICE_NOT_PAIRED:
+                    Toast.makeText(getApplicationContext(), "No HxM Bluetooth device is paired.", Toast.LENGTH_LONG).show();
+
+                default:
+            }
+
+            if (bluetoothStatus != BLUETOOTH_CONNECTED) {
+                btnConnect.setText("Connect");
+            }
+
+            btnConnect.setTextColor(Color.BLACK);
+            btnConnect.setEnabled(true);
+        }
+    }
+  
 	private void logHeartRateToFile(int hr) {
         if (isExternalStorageWritable()) {
             File logDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "heartrates");
