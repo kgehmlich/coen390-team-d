@@ -52,6 +52,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -61,6 +62,7 @@ import zephyr.android.HxMBT.BTClient;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnConnect;
+    private Button btnSimulation;
 
     private boolean manualAlertSent;
 
@@ -168,22 +170,31 @@ public class MainActivity extends AppCompatActivity {
         // SIMULATION //
         ////////////////
 
-        Button testBtn = (Button) findViewById(R.id.testButton);
+        /*Button testBtn = (Button) findViewById(R.id.testButton);
         if (testBtn != null) {
             testBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
 
                     for (int i = 100; i < 110; i++) {
-                        Message text1 = Newhandler.obtainMessage(HEART_RATE);
+                        Message text1 = heartRateHandler.obtainMessage(HEART_RATE);
                         Bundle b1 = new Bundle();
                         b1.putString("HeartRate", String.valueOf(i));
                         text1.setData(b1);
-                        Newhandler.sendMessage(text1);
+                        heartRateHandler.sendMessage(text1);
                     }
                 }
 
             });
-        }
+        }*/
+
+        btnSimulation = (Button) findViewById(R.id.testButton);
+        btnSimulation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickStartSimulation();
+            }
+        });
+
         ////////////////////
         // END SIMULATION //
         ////////////////////
@@ -200,6 +211,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void onClickStartSimulation() {
+        startSimulation();
+        btnSimulation.setText("Stop Simulation");
+        btnSimulation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickStopSimulation();
+            }
+        });
+    }
+
+    private void onClickStopSimulation() {
+        stopSimulation();
+        btnSimulation.setText("Start Simulation");
+        btnSimulation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickStartSimulation();
+            }
+        });
     }
 
 	@Override
@@ -503,7 +536,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    final Handler Newhandler = new Handler() {
+    final Handler heartRateHandler = new Handler() {
         public void handleMessage(Message msg) {
             TextView tv;
             switch (msg.what) {
@@ -677,7 +710,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             _bt = new BTClient(_btAdapter, BhMacID);
-            _NConnListener = new NewConnectedListener(Newhandler, Newhandler);
+            _NConnListener = new NewConnectedListener(heartRateHandler, heartRateHandler);
             _bt.addConnectedEventListener(_NConnListener);
 
 
@@ -784,4 +817,45 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
+
+
+
+    // ****************************************
+    // * Heart Rate Simulation
+    // ****************************************
+
+    private Handler simulationHandler;
+    private static final int SIMULATION_DELAY_SECS = 1;
+
+    private void startSimulation() {
+        // First, disconnect from bluetooth (don't want to mix simulation with real life)
+        onClickDisconnectButton();
+
+        // Start simulation
+        simulationHandler = new Handler();
+        simulationHandler.post(simulateHeartRates);
+    }
+
+    private void stopSimulation() {
+        simulationHandler.removeCallbacks(simulateHeartRates);
+    }
+
+    Runnable simulateHeartRates = new Runnable() {
+        @Override
+        public void run() {
+            Random randGen = new Random();
+            int hrInt = 50 + randGen.nextInt(200);  // random heart rate between 50..250
+
+            // Use existing channels to send a new heart rate
+            Message hrMsg = heartRateHandler.obtainMessage(HEART_RATE);
+            Bundle b = new Bundle();
+            b.putString("HeartRate", String.valueOf(hrInt));
+            hrMsg.setData(b);
+            heartRateHandler.sendMessage(hrMsg);
+
+            // Run again in 1 sec
+            simulationHandler.postDelayed(simulateHeartRates, SIMULATION_DELAY_SECS * 1000);    // Times 1000 for milliseconds
+        }
+    };
 }
