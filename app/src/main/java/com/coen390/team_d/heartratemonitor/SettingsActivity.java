@@ -23,7 +23,7 @@ public class SettingsActivity extends AppCompatActivity {
 	protected EditText ageEditText;
 	protected TextView nameState;
 	protected TextView ageState;
-	protected boolean editFlag = false;
+	//protected boolean editFlag = false;
 	protected Button btnSaveSetting;
 	protected Button cancelButton;
 
@@ -39,8 +39,8 @@ public class SettingsActivity extends AppCompatActivity {
 		cancelButton =(Button)findViewById(R.id.cancelButton);
 		nameEditText.setFocusable(false);
 		ageEditText.setFocusable(false);
-		btnSaveSetting.setVisibility(View.INVISIBLE);
-		cancelButton.setVisibility(View.INVISIBLE);
+		//btnSaveSetting.setVisibility(View.INVISIBLE);
+		//cancelButton.setVisibility(View.INVISIBLE);
 		populateFields();
 		Log.d(TAG, "onCreate()");
 		populateFields();
@@ -133,6 +133,7 @@ public class SettingsActivity extends AppCompatActivity {
 	/**
 	 * Adds toolbar menu to this activity
 	 */
+	/*
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -143,6 +144,7 @@ public class SettingsActivity extends AppCompatActivity {
 	/**
 	 * Handles menu item clicks
 	 */
+	/*
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
@@ -180,4 +182,5 @@ public class SettingsActivity extends AppCompatActivity {
 		}
 		invalidateOptionsMenu();
 	}
+	*/
 }

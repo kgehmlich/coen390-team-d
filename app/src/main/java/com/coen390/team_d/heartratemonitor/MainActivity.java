@@ -578,6 +578,11 @@ public class MainActivity extends AppCompatActivity {
         //TODO Set MAXBPM as SharedPref entry
 
         switch (MaxHRPercent / 10) {
+			case 14:
+			case 13:
+			case 12:
+			case 11:
+			case 10:
             case 9:
                 HRzone = "VO2 Max";
                 break;
