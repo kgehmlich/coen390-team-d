@@ -232,34 +232,6 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         updateHandler.removeCallbacks(updateHeartRates);
     }
 
-
-    /**
-     * Adds toolbar menu to this activity
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.team_monitoring_menu, menu);
-        return true;
-    }
-
-    /**
-     * Handles menu item clicks
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        // If the "Enable Edit" menu button was clicked, make the text inputs editable
-        switch (item.getItemId()) {
-            case R.id.settings:
-                goToSettingsActivity();
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }
-
     private void goToSettingsActivity() {
         Intent intent = new Intent(TeamMonitoringActivity.this, SettingsActivity.class);
         startActivity(intent);
