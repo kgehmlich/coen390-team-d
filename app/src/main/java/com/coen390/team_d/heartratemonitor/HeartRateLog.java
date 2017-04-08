@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 /**
  * Created by Kyle on 2017-04-06.
+ *
  */
 
 public class HeartRateLog {
@@ -29,6 +30,9 @@ public class HeartRateLog {
             userHRLogs.put(userName, new LineGraphSeries<>());
         }
 
-        userHRLogs.get(userName).appendData(new DataPoint(timestamp, heartRate.intValue()), GraphScroll, 3600);
+        // Do not log negative heart rates
+        if (heartRate.intValue() >= 0) {
+            userHRLogs.get(userName).appendData(new DataPoint(timestamp, heartRate.intValue()), GraphScroll, 3600);
+        }
     }
 }
