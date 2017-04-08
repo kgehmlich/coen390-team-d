@@ -44,6 +44,14 @@ public class SettingsActivity extends AppCompatActivity {
 		populateFields();
 		Log.d(TAG, "onCreate()");
 		populateFields();
+    
+    
+    SharedPreferences prefs = getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
+    String name = prefs.getString("name", null);
+    if (name != null) nameEditText.setText(name);
+
+    int age = prefs.getInt("age", 0);
+    if (age != 0) ageEditText.setText(Integer.toString(age));
 		
 		
 		btnSaveSetting.setOnClickListener(new View.OnClickListener()
@@ -89,48 +97,38 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 
 	private boolean onClickSaveButton(View v) {
-		SharedPreferences prefs =
-				getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = prefs.edit();
-		int age;
-		boolean checkFlag = true;
-		if (nameEditText.getText().toString().trim().isEmpty()){
-			nameState.setText("No input");
-			checkFlag = false;
-		}
-		else {
-			nameState.setText("");
-			editor.putString("name", nameEditText.getText().toString());
-		}
-		if (ageEditText.getText().toString().trim().isEmpty()){
-			ageState.setText("No input");
-			checkFlag = false;
-		}
-		
-		else {
-			age = Integer.parseInt(ageEditText.getText().toString().trim());
-			if (age<18 || age>65){
-				ageState.setText("Invalid");
-				checkFlag = false;
-			}
-			else{
-				ageState.setText("");
-				editor.putInt("age", age);
-			}
-		}
-		
-		editor.commit();
-		if (checkFlag) {
-			Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show();
-			populateFields();
-		}
-		else
-		{
-			Toast toast = Toast.makeText(this, "Invalid profile input", Toast.LENGTH_SHORT);
-			toast.show();
-		}
-		return checkFlag;
+		// Validate age and name edit text
+        String nameString = nameTextBox.getText().toString();
+        int age = Integer.valueOf(ageTextBox.getText().toString());
+
+        if (!nameString.matches("[A-Za-z]+([ -][A-Za-z]+)*")) {
+            nameTextBox.setError("Only letters, hyphens, and spaces are allowed. Must end with a letter.");
+            return;
+        }
+
+        if (nameString.length() > 25) {
+            nameTextBox.setError("Must be 25 characters or fewer.");
+            return false;
+        }
+
+        if (age > 65 || age < 18) {
+            ageTextBox.setError("Must be between 18-65.");
+            return false;
+        }
+
+
+        SharedPreferences prefs =
+                getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("age", age);
+        editor.putString("name", nameString);
+        editor.commit();
+
+        Toast.makeText(getApplicationContext(), "Profile saved", Toast.LENGTH_SHORT).show();
+        return true;
 	}
+
 
 	/**
 	 * Adds toolbar menu to this activity
