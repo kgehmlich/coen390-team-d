@@ -37,21 +37,14 @@ public class SettingsActivity extends AppCompatActivity {
 		ageState = (TextView) findViewById(R.id.ageState);
 		btnSaveSetting =(Button)findViewById(R.id.profileSaveButton);
 		cancelButton =(Button)findViewById(R.id.cancelButton);
-		nameEditText.setFocusable(false);
-		ageEditText.setFocusable(false);
+		//nameEditText.setFocusable(true);
+		//ageEditText.setFocusable(true);
 		//btnSaveSetting.setVisibility(View.INVISIBLE);
 		//cancelButton.setVisibility(View.INVISIBLE);
 		populateFields();
 		Log.d(TAG, "onCreate()");
-		populateFields();
-    
-    
-    SharedPreferences prefs = getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
-    String name = prefs.getString("name", null);
-    if (name != null) nameEditText.setText(name);
-
-    int age = prefs.getInt("age", 0);
-    if (age != 0) ageEditText.setText(Integer.toString(age));
+		
+		
 		
 		
 		btnSaveSetting.setOnClickListener(new View.OnClickListener()
@@ -80,7 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
 	void populateFields(){
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 		String name = prefs.getString("name", null);
-		int age = prefs.getInt("age", -1);
+		int age = prefs.getInt("age", 0);
 		
 		if(name != null) {
 			nameEditText.setText(name);
@@ -88,7 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
 		else{
 			nameEditText.setText("");
 		}
-		if(age != -1) {
+		if(age != 0) {
 			ageEditText.setText(Integer.toString(age));
 		}
 		else{
@@ -99,9 +92,11 @@ public class SettingsActivity extends AppCompatActivity {
 	private boolean onClickSaveButton(View v) {
 		// Validate age and name edit text
         String nameString = nameEditText.getText().toString();
-        int age = Integer.valueOf(ageEditText.getText().toString());
+        int age;
 
         if (!nameString.matches("[A-Za-z]+([ -][A-Za-z]+)*")) {
+	
+			Log.d(TAG, "setError()");
             nameEditText.setError("Only letters, hyphens, and spaces are allowed. Must end with a letter.");
             return false;
         }
@@ -110,11 +105,16 @@ public class SettingsActivity extends AppCompatActivity {
             nameEditText.setError("Must be 25 characters or fewer.");
             return false;
         }
-
-        if (age > 65 || age < 18) {
-            ageEditText.setError("Must be between 18-65.");
-            return false;
-        }
+        if (ageEditText.getText().toString().length() == 2) {
+			age = Integer.valueOf(ageEditText.getText().toString());
+			if (age > 65 || age < 18) {
+				ageEditText.setError("Must be between 18-65.");
+				return false;
+			}
+		} else {
+			ageEditText.setError("Must be between 18-65.");
+			return false;
+		}
 
 
         SharedPreferences prefs =

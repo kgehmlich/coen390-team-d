@@ -570,10 +570,7 @@ public class MainActivity extends AppCompatActivity {
         TextView tv;
         int MaxHRPercent;
         String HRzone = new String();
-
-        if (HR > MaxBPM) {
-            MaxBPM = HR;
-        }
+		
         MaxHRPercent = HR * 100 / MaxBPM;
         //TODO Set MAXBPM as SharedPref entry
 
