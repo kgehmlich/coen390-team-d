@@ -25,92 +25,64 @@ import com.jjoe64.graphview.series.Series;
 
 public class SettingsActivity extends AppCompatActivity {
 
-	private LineGraphSeries<DataPoint> series;
+    EditText nameTextBox;
+    EditText ageTextBox;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_settings);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
 
-		//Create graph
-		GraphView graph = (GraphView) findViewById(R.id.graphSet);
-		series = new LineGraphSeries<DataPoint>();
+        Button btnSaveSetting = (Button) findViewById(R.id.profileSaveButton);
+        btnSaveSetting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickSaveButton(v);
+            }
+        });
 
-		//Set Graph Formatting
-		Paint paint = new Paint();
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(2);
-		paint.setColor(Color.RED);
-		series.setCustomPaint(paint);
-		series.setDrawDataPoints(true);
-		series.setDataPointsRadius(10);
-		//Method for displaying point information when a point is tapped
-		series.setOnDataPointTapListener(new OnDataPointTapListener() {
-			@Override
-			public void onTap(Series series, DataPointInterface dataPoint) {
-				Toast.makeText(getApplicationContext()," " + dataPoint,Toast.LENGTH_SHORT).show();
-			}
-		});
+        nameTextBox = (EditText) findViewById(R.id.nameEditText);
+        ageTextBox = (EditText) findViewById(R.id.ageEditText);
 
-		//graph.getGridLabelRenderer().setHorizontalAxisTitle("Time");
-		graph.getGridLabelRenderer().setVerticalAxisTitle("Heart Rate");
+        SharedPreferences prefs = getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
+        String name = prefs.getString("name", null);
+        if (name != null) nameTextBox.setText(name);
 
-		//need manual bounds for scrolling to function
-		// set manual Y bounds (Heart Rate)
-		graph.getViewport().setYAxisBoundsManual(true);
-		graph.getViewport().setMinY(0);
-		graph.getViewport().setMaxY(200);
+        int age = prefs.getInt("age", 0);
+        if (age != 0) ageTextBox.setText(Integer.toString(age));
+    }
 
-		// set manual X bounds (Time points)
-		graph.getViewport().setXAxisBoundsManual(true);
-		graph.getViewport().setMinX(0);
-		graph.getViewport().setMaxX(20);
+    private void onClickSaveButton(View v) {
 
-		graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-		graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
-		//Creates graph using series
-		graph.addSeries(series);
+        //TODO Validate age and name edit text
 
-		Button btnSaveSetting =(Button)findViewById(R.id.profileSaveButton);
-		btnSaveSetting.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				onClickSaveButton(v);
-			}
-		});
-	}
+        SharedPreferences prefs =
+                getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
 
-	private void onClickSaveButton(View v) {
+        EditText ageText = (EditText) findViewById(R.id.ageEditText);
+        EditText nameText = (EditText) findViewById(R.id.nameEditText);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("age", Integer.valueOf(ageText.getText().toString()));
+        editor.putString("name", nameText.getText().toString());
+        editor.commit();
 
-		//TODO Validate age and name edit text
+        Toast.makeText(getApplicationContext(), "Profile saved", Toast.LENGTH_SHORT).show();
+    }
 
-		SharedPreferences prefs =
-				getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
-
-		EditText ageText =(EditText)findViewById(R.id.ageEditText);
-		EditText nameText =(EditText)findViewById(R.id.nameEditText);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putInt("age", Integer.valueOf(ageText.getText().toString()));
-		editor.putString("name", nameText.getText().toString());
-		editor.commit();
-	}
-
-	/**
-	 * Adds toolbar menu to this activity
-	 */
-	@Override
+    /**
+     * Adds toolbar menu to this activity
+     */
+    /*@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.settings_menu, menu);
 		return true;
-	}
-	
-	/**
-	 * Handles menu item clicks
-	 */
-	@Override
+	}*/
+
+    /**
+     * Handles menu item clicks
+     */
+	/*@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
@@ -122,42 +94,5 @@ public class SettingsActivity extends AppCompatActivity {
 				return super.onOptionsItemSelected(item);
 		}
 		return true;
-	}
-	//Function that allows the graph to be real-time updated
-	//TODO: May need to be altered or triggered for use with calibration function
-	@Override
-	protected void onResume(){
-		super.onResume();
-		//Thread in control of updating data series
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						//Calls function responsible for adding data to graph series
-						addEntry();
-					}
-				});
-				// sleep to slow down the add of entries.
-				try {
-					//Values are in milliseconds. This decides how often the graph is updated
-					//May need to change to suit our uses
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// manage error if need be...
-				}
-			}
-		}).start();
-	}
-
-	// add data to graph
-	private void addEntry() {
-		// here, we choose to display max 30 points on the graph and we scroll to end
-		//TODO: needs proper inputs from AWS here
-		double x = 1;
-		double y = 1;
-		series.appendData(new DataPoint(x, y), true, 30);
-	}
-	
+	}*/
 }
