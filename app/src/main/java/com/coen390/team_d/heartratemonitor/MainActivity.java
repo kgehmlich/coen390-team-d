@@ -99,25 +99,12 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
 
-
-		///////////////
-		// Set up UI //
-		///////////////
-		TextView tv;
-		tv = (TextView)findViewById(R.id.usernameTextview);
-		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-		String name = prefs.getString("name", null);
-		if (name != null)tv.setText(name);
-
-		tv = (TextView)findViewById(R.id.userAge);
-		int age = prefs.getInt("age", 55);
-		tv.setText("Age: " + Integer.toString(age));
 
 		//////////////////////////////
 		// Set up Monitoring Switch //
 		//////////////////////////////
-
 		Switch MonitoringSwitch = (Switch) findViewById(R.id.MonitoringSwitch);
 		MonitoringSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -143,10 +130,6 @@ public class MainActivity extends AppCompatActivity {
 		// Set up Graph //
 		//////////////////
 		setupGraph();
-		//////////////////
-		// Set up MaxHR //
-		//////////////////
-		setupMaxHR();
 
 		Button alertButton = (Button) findViewById(R.id.alertButton);
 		alertButton.setOnClickListener(new View.OnClickListener()
@@ -205,6 +188,31 @@ public class MainActivity extends AppCompatActivity {
 				}
 			});
 		}
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		/////////////////////////////
+		// Check if profile exists //
+		/////////////////////////////
+		CheckProfile();
+		///////////////
+		// Set up UI //
+		///////////////
+		TextView tv;
+		tv = (TextView)findViewById(R.id.usernameTextview);
+		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+		String name = prefs.getString("name", null);
+		if (name != null)tv.setText(name);
+		
+		tv = (TextView)findViewById(R.id.userAge);
+		int age = prefs.getInt("age", -1);
+		if (age != -1)tv.setText("Age: " + Integer.toString(age));
+		//////////////////
+		// Set up MaxHR //
+		//////////////////
+		setupMaxHR();
 	}
 
 	@Override
@@ -307,7 +315,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
-
 
 	private void onClickAlertButton(View v) {
 
@@ -417,6 +424,42 @@ public class MainActivity extends AppCompatActivity {
 			graph.getViewport().setMaxY(MaxBPM);
 		else
 			graph.getViewport().setMaxY(200);
+	}
+	
+	private void CheckProfile(){
+		Log.d(TAG, "Checking if profile exists");
+		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
+		
+		//Uncomment to clear SharedPreference content
+		//prefs.edit().clear().apply();
+		String name = prefs.getString("name", null);
+		int age = prefs.getInt("age", -1);
+		Log.d(TAG, "age: " + age);
+		Log.d(TAG, "name: " + name);
+		
+		if (name == null && age == -1) ShowPopup("No profile was found, please fill in your profile information");
+		else if (name == null) ShowPopup("No Name was found in your profile, please fill in your profile information");
+		else if (age == -1) ShowPopup("No age was found in your profile, please fill in your profile information");
+		
+		
+	}
+	
+	private void ShowPopup(String message){
+		Log.d(TAG, "New Popup " + message);
+		AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
+		helpBuilder.setTitle("Profile Check");
+		helpBuilder.setMessage(message);
+		helpBuilder.setPositiveButton("Ok",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						//Go to SettingsActivity
+						goToSettingsActivity();
+					}
+				});
+		
+		// Remember, create doesn't show the dialog
+		AlertDialog helpDialog = helpBuilder.create();
+		helpDialog.show();
 	}
 
 	private void setupMaxHR(){
@@ -549,11 +592,6 @@ public class MainActivity extends AppCompatActivity {
 			}
 		}
 	};
-
-	@Override
-	protected void onResume(){
-		super.onResume();
-	}
 
 	private void HRAverages(int HR){
 		TextView tv;
