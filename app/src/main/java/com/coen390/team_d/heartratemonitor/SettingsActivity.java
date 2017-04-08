@@ -98,21 +98,21 @@ public class SettingsActivity extends AppCompatActivity {
 
 	private boolean onClickSaveButton(View v) {
 		// Validate age and name edit text
-        String nameString = nameTextBox.getText().toString();
-        int age = Integer.valueOf(ageTextBox.getText().toString());
+        String nameString = nameEditText.getText().toString();
+        int age = Integer.valueOf(ageEditText.getText().toString());
 
         if (!nameString.matches("[A-Za-z]+([ -][A-Za-z]+)*")) {
-            nameTextBox.setError("Only letters, hyphens, and spaces are allowed. Must end with a letter.");
-            return;
+            nameEditText.setError("Only letters, hyphens, and spaces are allowed. Must end with a letter.");
+            return false;
         }
 
         if (nameString.length() > 25) {
-            nameTextBox.setError("Must be 25 characters or fewer.");
+            nameEditText.setError("Must be 25 characters or fewer.");
             return false;
         }
 
         if (age > 65 || age < 18) {
-            ageTextBox.setError("Must be between 18-65.");
+            ageEditText.setError("Must be between 18-65.");
             return false;
         }
 
