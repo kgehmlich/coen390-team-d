@@ -21,25 +21,6 @@ package com.coen390.team_d.heartratemonitor. {
 		-send()
 	}
 
-	interface GMailSender{
-		__ Fields __
-		-String mailhost
-		-String user
-		-String password
-		-Session session
-
-		__ Methods __
-		+sendMail()
-		+GMailSender()
-		#getPasswordAuthentication()
-		-initializeApplication()
-	}
-
-	interface JSSEProvider {
-		__ Methods __
-		+JSSEProvider()
-	}
-
 	class FetchHeartRates {
 			__ Fields __
 			-ArrayList<HeartRatesDO> hrList
@@ -146,9 +127,20 @@ package com.coen390.team_d.heartratemonitor. {
 		class ZephyrProtocol
 		class ConnectListenerImpl
 	}
+	package com.amazonaws.models.nosql. {
+ 		class HeartRatesDO {
+			__ Fields __
+			-LineGraphSeries<DataPoint> series
 
+			__ Methods __
+			+onCreateOptionsMenu()
+			+onOptionsItemSelected()
+			#onCreate()
+			#onClickSaveButton()
+			#onResume()
+			-addEntry()
+ 	}
 
-JSSEProvider -right--o GMailSender
 NewConnectedListener -left--|> ConnectListenerImpl
 Application -up--|> MultiDexApplication
 AWSDatabaseHelper -up..> SharedPreferences
@@ -160,7 +152,6 @@ TeamMonitoringActivity -down--|> AppCompatActivity
 FetchHeartRates -up--|> AsyncTask
 FetchHeartRates -up--o TeamMonitoringActivity
 NewConnectedListener -up--o MainActivity
-GMailSender -up--o MainActivity
 
 
 SettingsActivity -up..> SharedPreferences
