@@ -23,7 +23,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/nameEditText"
         app:layout_constraintTop_toTopOf="@+id/nameEditText"/>
-  
+
     <EditText
         android:id="@+id/nameEditText"
         android:hint="Type here"
@@ -31,6 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -"
+        android:maxLength="25"
         android:ems="10"
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -76,6 +77,7 @@
 
     <EditText
         android:id="@+id/ageEditText"
+        android:maxLength="2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/nameEditText"
