@@ -1,8 +1,6 @@
 package com.coen390.team_d.heartratemonitor;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -10,9 +8,6 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 //Graph related imports
 import android.graphics.Color;
@@ -230,11 +225,6 @@ public class TeamMonitoringActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         updateHandler.removeCallbacks(updateHeartRates);
-    }
-
-    private void goToSettingsActivity() {
-        Intent intent = new Intent(TeamMonitoringActivity.this, SettingsActivity.class);
-        startActivity(intent);
     }
 
     // Class to asynchronously update the UI with data from server

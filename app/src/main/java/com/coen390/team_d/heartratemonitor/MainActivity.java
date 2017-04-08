@@ -20,7 +20,6 @@ import android.widget.Toast;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import com.amazonaws.models.nosql.HeartRatesDO;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
@@ -57,7 +56,6 @@ import java.util.Set;
 
 
 import zephyr.android.HxMBT.BTClient;
-//import zephyr.android.HxMBT.ZephyrProtocol;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -76,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
     //private final static int AVG_HR_COUNT = 10;
 
     private final int HEART_RATE = 0x100;
-    private final int INSTANT_SPEED = 0x101;
     private final static int REQUEST_ENABLE_BT = 1;
 
     //Fields for Graph
