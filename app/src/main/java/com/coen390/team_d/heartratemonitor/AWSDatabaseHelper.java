@@ -40,16 +40,9 @@ public class AWSDatabaseHelper {
     }
 
 
-    public void sendAlert(int heartRate) {
+    public void updateHeartRate(int heartRate, boolean alert) {
         _item.setHeartRate((double) heartRate);
-        _item.setAlert(true);
-
-        this.send();
-    }
-
-    public void updateHeartRate(int heartRate) {
-        _item.setHeartRate((double) heartRate);
-        _item.setAlert(false);
+        _item.setAlert(alert);
 
         this.send();
     }

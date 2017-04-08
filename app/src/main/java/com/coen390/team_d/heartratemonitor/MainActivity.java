@@ -3,6 +3,7 @@ package com.coen390.team_d.heartratemonitor;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +19,8 @@ import android.widget.Toast;
 //Graph related imports
 import android.graphics.Color;
 import android.graphics.Paint;
+
+import com.amazonaws.models.nosql.HeartRatesDO;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
@@ -39,9 +42,14 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -54,12 +62,12 @@ import zephyr.android.HxMBT.BTClient;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnConnect;
+  private Button btnConnect;
 
 	// TAG for logging to console
+	private static final String TAG = "MainActivity";
 	private boolean RemoteMonitoringFlag = true;
 	private Context mContext = this;
-	private static final String TAG = "MainActivity";
 	private BluetoothAdapter _btAdapter = null;
 	private BTClient _bt;
 	private NewConnectedListener _NConnListener;
@@ -190,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
 		// END SIMULATION //
 		////////////////////
 
+
         // ***************************************************
 		// Obtaining the handle to act on the CONNECT button
         // ***************************************************
@@ -211,7 +220,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 
     private void onClickConnectButton() {
-
         new BluetoothAsyncConnector().execute();
     }
 
@@ -244,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
 
 		// Send alert through AWS Dynamo DB
 		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
-		dbHelper.sendAlert(-1);
+		dbHelper.updateHeartRate(-1, true);
 		Toast.makeText(getApplicationContext(), "Notification has been sent", Toast.LENGTH_LONG).show();
 	}
 
@@ -355,7 +363,7 @@ public class MainActivity extends AppCompatActivity {
 		//TODO if MAXBPM!=null in SharedPref, MaxBPM = SharedPref.GetMAXBPM()
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 		int age = prefs.getInt("age", 20);
-		MaxBPM = 208 - (7 * age /10);
+		MaxBPM =  (int) (208 - 0.7 * age);
 		Log.d(TAG, "MaxBPM set to : " + MaxBPM);
 		TextView tv;
 		tv = (TextView)findViewById(R.id.HRMax);
@@ -471,6 +479,9 @@ public class MainActivity extends AppCompatActivity {
 					if (RemoteMonitoringFlag){
 						RemoteMonitoringUpdate(heartRateInt);
 					}
+
+					logHeartRateToFile(heartRateInt);
+
 					break;
 				default:
 					break;
@@ -570,9 +581,9 @@ public class MainActivity extends AppCompatActivity {
 		AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
 
 		if (HR > MaxBPM)
-			dbHelper.sendAlert(HR);
+			dbHelper.updateHeartRate(HR, true);
 		else if (DatapointCounter % 10000 == 0) {
-			dbHelper.updateHeartRate((int)TenSecAvg);
+			dbHelper.updateHeartRate((int)TenSecAvg, false);
 			Log.d(TAG, "AWSDatabase Updated with : " + TenSecAvg);
 		}
 	}
@@ -692,5 +703,50 @@ public class MainActivity extends AppCompatActivity {
             btnConnect.setTextColor(Color.BLACK);
             btnConnect.setEnabled(true);
         }
+    }
+  
+	private void logHeartRateToFile(int hr) {
+        if (isExternalStorageWritable()) {
+            File logDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "heartrates");
+            File logFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "heartrates/log.csv");
+
+            if (!logDir.mkdirs()) {
+                Log.e("Logging", "Unable to create directory");
+            }
+
+            // create file if it doesn't exist
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            java.util.Date now = calendar.getTime();
+            java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+
+            String line = hr + "," + currentTimestamp.toString();
+
+            try {
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(line);
+                buf.newLine();
+                buf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
     }
 }
