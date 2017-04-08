@@ -330,37 +330,36 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setupSeries() {
-        series = new LineGraphSeries<>();
-        //Set Graph Formatting
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(6);
-        paint.setColor(Color.RED);
-        series.setCustomPaint(paint);
-        series.setDrawDataPoints(true);
-        series.setDataPointsRadius(4);
-        //Method for displaying point information when a point is tapped
-        series.setOnDataPointTapListener(new OnDataPointTapListener() {
-            @Override
-            public void onTap(Series series, DataPointInterface dataPoint) {
-                Date d = new Date((long) dataPoint.getX());
-                Toast.makeText(getApplicationContext(), formatter.format(d) + " : " + (int) dataPoint.getY() + " BPM", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void refreshGraphBounds() {
-        Date d1 = new Date();
-        graphStart = d1.getTime() / 120000 * 120000; //Rounds the bound to the 2 minutes
-        graphEnd = graphStart + GraphSize;
-        graph.getViewport().setMinX(graphStart);
-        graph.getViewport().setMaxX(graphEnd);
-        graph.getViewport().setMinY(30);
-        if (MaxBPM > 200)
-            graph.getViewport().setMaxY(MaxBPM);
-        else
-            graph.getViewport().setMaxY(200);
-    }
+	private void setupSeries(){
+		series = new LineGraphSeries<>();
+		//Set Graph Formatting
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(6);
+		paint.setColor(Color.GREEN);
+		series.setCustomPaint(paint);
+		series.setDrawDataPoints(true);
+		series.setDataPointsRadius(4);
+		//Method for displaying point information when a point is tapped
+		series.setOnDataPointTapListener(new OnDataPointTapListener() {
+			@Override
+			public void onTap(Series series, DataPointInterface dataPoint) {
+				Date d = new Date((long)dataPoint.getX());
+				Toast.makeText(getApplicationContext(), formatter.format(d) + " : " + (int) dataPoint.getY() + " BPM",Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+	private void refreshGraphBounds(){
+		Date d1 = new Date();
+		graphStart = d1.getTime()/120000*120000; //Rounds the bound to the 2 minutes
+		graphEnd = graphStart+GraphSize;
+		graph.getViewport().setMinX(graphStart);
+		graph.getViewport().setMaxX(graphEnd);
+		graph.getViewport().setMinY(30);
+		if (MaxBPM > 200)
+			graph.getViewport().setMaxY(MaxBPM);
+		else
+			graph.getViewport().setMaxY(200);
+	}
 
     private void setupMaxHR() {
 
