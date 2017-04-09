@@ -600,11 +600,15 @@ public class MainActivity extends AppCompatActivity {
         TextView tv;
         int MaxHRPercent;
         String HRzone = new String();
-
         MaxHRPercent = HR * 100 / MaxBPM;
         //TODO Set MAXBPM as SharedPref entry
 
         switch (MaxHRPercent / 10) {
+			case 14:
+			case 13:
+			case 12:
+			case 11:
+			case 10:
             case 9:
                 HRzone = "VO2 Max";
                 break;
