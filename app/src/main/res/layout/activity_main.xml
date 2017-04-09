@@ -235,7 +235,7 @@
         android:id="@+id/testButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TEST HR"
+        android:text="SIMULATION"
         android:background="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="8dp"

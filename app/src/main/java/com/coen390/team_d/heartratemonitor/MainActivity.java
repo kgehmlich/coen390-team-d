@@ -52,6 +52,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -61,6 +62,7 @@ import zephyr.android.HxMBT.BTClient;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnConnect;
+    private Button btnSimulation;
 
     private boolean manualAlertSent;
 
@@ -113,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("SettingsPreferences", Context.MODE_PRIVATE);
         String name = prefs.getString("name", null);
         if (name != null) tv.setText(name);
-	
+
 		//////////////////////////////
 		// Set up Monitoring Switch //
 		//////////////////////////////
@@ -168,22 +170,31 @@ public class MainActivity extends AppCompatActivity {
         // SIMULATION //
         ////////////////
 
-        Button testBtn = (Button) findViewById(R.id.testButton);
+        /*Button testBtn = (Button) findViewById(R.id.testButton);
         if (testBtn != null) {
             testBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
 
                     for (int i = 100; i < 110; i++) {
-                        Message text1 = Newhandler.obtainMessage(HEART_RATE);
+                        Message text1 = heartRateHandler.obtainMessage(HEART_RATE);
                         Bundle b1 = new Bundle();
                         b1.putString("HeartRate", String.valueOf(i));
                         text1.setData(b1);
-                        Newhandler.sendMessage(text1);
+                        heartRateHandler.sendMessage(text1);
                     }
                 }
 
             });
-        }
+        }*/
+
+        btnSimulation = (Button) findViewById(R.id.testButton);
+        btnSimulation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickStartSimulation();
+            }
+        });
+
         ////////////////////
         // END SIMULATION //
         ////////////////////
@@ -202,6 +213,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void onClickStartSimulation() {
+        startSimulation();
+        btnSimulation.setText("Stop Simulation");
+        btnSimulation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickStopSimulation();
+            }
+        });
+    }
+
+    private void onClickStopSimulation() {
+        stopSimulation();
+        btnSimulation.setText("Start Simulation");
+        btnSimulation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickStartSimulation();
+            }
+        });
+    }
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -217,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 		String name = prefs.getString("name", null);
 		if (name != null)tv.setText(name);
-		
+
 		tv = (TextView)findViewById(R.id.userAge);
 		int age = prefs.getInt("age", -1);
 		if (age != -1)tv.setText("Age: " + Integer.toString(age));
@@ -365,30 +398,30 @@ public class MainActivity extends AppCompatActivity {
 		graph.getViewport().setMinX(graphStart);
 		graph.getViewport().setMaxX(graphEnd);
 		graph.getViewport().setMinY(30);
-		if (MaxBPM > 200)
+		if (MaxBPM > 220)
 			graph.getViewport().setMaxY(MaxBPM);
 		else
-			graph.getViewport().setMaxY(200);
+			graph.getViewport().setMaxY(220);
 	}
-	
+
 	private void CheckProfile(){
 		Log.d(TAG, "Checking if profile exists");
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
-		
+
 		//Uncomment to clear SharedPreference content
 		//prefs.edit().clear().apply();
 		String name = prefs.getString("name", null);
 		int age = prefs.getInt("age", -1);
 		Log.d(TAG, "age: " + age);
 		Log.d(TAG, "name: " + name);
-		
+
 		if (name == null && age == -1) ShowPopup("No profile was found, please fill in your profile information");
 		else if (name == null) ShowPopup("No Name was found in your profile, please fill in your profile information");
 		else if (age == -1) ShowPopup("No age was found in your profile, please fill in your profile information");
-		
-		
+
+
 	}
-	
+
 	private void ShowPopup(String message){
 		Log.d(TAG, "New Popup " + message);
 		AlertDialog.Builder helpBuilder = new AlertDialog.Builder(this);
@@ -401,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
 						goToSettingsActivity();
 					}
 				});
-		
+
 		// Remember, create doesn't show the dialog
 		AlertDialog helpDialog = helpBuilder.create();
 		helpDialog.show();
@@ -503,7 +536,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    final Handler Newhandler = new Handler() {
+    final Handler heartRateHandler = new Handler() {
         public void handleMessage(Message msg) {
             TextView tv;
             switch (msg.what) {
@@ -567,7 +600,6 @@ public class MainActivity extends AppCompatActivity {
         TextView tv;
         int MaxHRPercent;
         String HRzone = new String();
-		
         MaxHRPercent = HR * 100 / MaxBPM;
         //TODO Set MAXBPM as SharedPref entry
 
@@ -679,7 +711,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             _bt = new BTClient(_btAdapter, BhMacID);
-            _NConnListener = new NewConnectedListener(Newhandler, Newhandler);
+            _NConnListener = new NewConnectedListener(heartRateHandler, heartRateHandler);
             _bt.addConnectedEventListener(_NConnListener);
 
 
@@ -786,4 +818,59 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
+
+
+
+    // ****************************************
+    // * Heart Rate Simulation
+    // ****************************************
+
+    private Handler simulationHandler;
+    private static final int SIMULATION_DELAY_SECS = 1;
+
+    private int upperBound;
+    private int lowerBound;
+    private static final int INCREASE_RATE = 2;
+
+    private void startSimulation() {
+        // First, disconnect from bluetooth (don't want to mix simulation with real life)
+        onClickDisconnectButton();
+
+        // set initial heart rate level
+        upperBound = 70;
+        lowerBound = 60;
+
+        // Start simulation
+        simulationHandler = new Handler();
+        simulationHandler.post(simulateHeartRates);
+    }
+
+    private void stopSimulation() {
+        simulationHandler.removeCallbacks(simulateHeartRates);
+    }
+
+    Runnable simulateHeartRates = new Runnable() {
+        @Override
+        public void run() {
+            Random randGen = new Random();
+            int hrInt = lowerBound + randGen.nextInt(upperBound - lowerBound);  // random heart rate within current bounds
+
+            // Use existing channels to send a new heart rate
+            Message hrMsg = heartRateHandler.obtainMessage(HEART_RATE);
+            Bundle b = new Bundle();
+            b.putString("HeartRate", String.valueOf(hrInt));
+            hrMsg.setData(b);
+            heartRateHandler.sendMessage(hrMsg);
+
+            // increase bounds (keep bounds stable when above 200)
+            if (lowerBound < 200) {
+                upperBound += INCREASE_RATE;
+                lowerBound += INCREASE_RATE;
+            }
+
+            // Run again in 1 sec
+            simulationHandler.postDelayed(simulateHeartRates, SIMULATION_DELAY_SECS * 1000);    // Times 1000 for milliseconds
+        }
+    };
 }
