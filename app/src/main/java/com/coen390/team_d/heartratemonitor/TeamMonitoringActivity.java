@@ -234,6 +234,9 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
             hrList = dbHelper.getListOfHeartRates();
+
+            if (hrList == null) return null;
+
             DatapointCounter += 10000;
             Boolean GraphScroll = false;
             if (WaitToScroll > 0) {
@@ -254,6 +257,9 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Void v) {
+
+            if (hrList == null) return;
+
             //Toast.makeText(getApplicationContext(), "Heart rates updated (" + hrList.size() + ")", Toast.LENGTH_LONG).show();
             int HR;
             if (item != null) {

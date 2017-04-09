@@ -187,13 +187,13 @@ public class MainActivity extends AppCompatActivity {
             });
         }*/
 
-        btnSimulation = (Button) findViewById(R.id.testButton);
-        btnSimulation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickStartSimulation();
-            }
-        });
+//        btnSimulation = (Button) findViewById(R.id.testButton);
+//        btnSimulation.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                onClickStartSimulation();
+//            }
+//        });
 
         ////////////////////
         // END SIMULATION //
@@ -213,27 +213,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void onClickStartSimulation() {
-        startSimulation();
-        btnSimulation.setText("Stop Simulation");
-        btnSimulation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickStopSimulation();
-            }
-        });
-    }
-
-    private void onClickStopSimulation() {
-        stopSimulation();
-        btnSimulation.setText("Start Simulation");
-        btnSimulation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickStartSimulation();
-            }
-        });
-    }
+//    private void onClickStartSimulation() {
+//        startSimulation();
+//        btnSimulation.setText("Stop Simulation");
+//        btnSimulation.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                onClickStopSimulation();
+//            }
+//        });
+//    }
+//
+//    private void onClickStopSimulation() {
+//        stopSimulation();
+//        btnSimulation.setText("Start Simulation");
+//        btnSimulation.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                onClickStartSimulation();
+//            }
+//        });
+//    }
 
 	@Override
 	protected void onResume() {

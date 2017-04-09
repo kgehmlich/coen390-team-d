@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class SettingsActivity extends AppCompatActivity {
-	
+
 	private static final String TAG = "SettingsActivity";
 	protected EditText nameEditText;
 	protected EditText ageEditText;
@@ -33,8 +34,6 @@ public class SettingsActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_settings);
 		nameEditText = (EditText) findViewById(R.id.nameEditText);
 		ageEditText = (EditText) findViewById(R.id.ageEditText);
-		nameState = (TextView) findViewById(R.id.nameState);
-		ageState = (TextView) findViewById(R.id.ageState);
 		btnSaveSetting =(Button)findViewById(R.id.profileSaveButton);
 		cancelButton =(Button)findViewById(R.id.cancelButton);
 		//nameEditText.setFocusable(true);
@@ -43,10 +42,14 @@ public class SettingsActivity extends AppCompatActivity {
 		//cancelButton.setVisibility(View.INVISIBLE);
 		populateFields();
 		Log.d(TAG, "onCreate()");
-		
-		
-		
-		
+
+
+		TextView ageWarningTV = (TextView) findViewById(R.id.ageWarning);
+		ageWarningTV.setText(Html.fromHtml("<b>WARNING:</b> Please enter your real age. This app uses age to calculate max heart rate."));
+
+
+
+
 		btnSaveSetting.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -55,10 +58,10 @@ public class SettingsActivity extends AppCompatActivity {
 				if (onClickSaveButton(v)){
 					finish();
 				}
-				
+
 			}
 		});
-		
+
 		cancelButton.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -68,13 +71,13 @@ public class SettingsActivity extends AppCompatActivity {
 			}
 		});
 	}
-	
+
 	//Repopulate the fields with the data saved in the SharedPreference, or clear them if no saved data
 	void populateFields(){
 		SharedPreferences prefs = getSharedPreferences("SettingsPreferences",Context.MODE_PRIVATE);
 		String name = prefs.getString("name", null);
 		int age = prefs.getInt("age", 0);
-		
+
 		if(name != null) {
 			nameEditText.setText(name);
 		}
@@ -95,7 +98,7 @@ public class SettingsActivity extends AppCompatActivity {
         int age;
 
         if (!nameString.matches("[A-Za-z]+([ -][A-Za-z]+)*")) {
-	
+
 			Log.d(TAG, "setError()");
             nameEditText.setError("Only letters, hyphens, and spaces are allowed. Must end with a letter.");
             return false;
@@ -140,14 +143,14 @@ public class SettingsActivity extends AppCompatActivity {
 		inflater.inflate(R.menu.settings_menu, menu);
 		return true;
 	}
-	
+
 	/**
 	 * Handles menu item clicks
 	 */
 	/*
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
 		switch (item.getItemId()) {
 			case R.id.enableEdit:
