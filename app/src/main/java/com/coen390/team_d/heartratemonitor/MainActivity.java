@@ -62,7 +62,7 @@ import zephyr.android.HxMBT.BTClient;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnConnect;
-    private Button btnSimulation;
+    //private Button btnSimulation;
 
     private boolean manualAlertSent;
 
@@ -313,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Handles menu item clicks
+     * Handles menu selectedItem clicks
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

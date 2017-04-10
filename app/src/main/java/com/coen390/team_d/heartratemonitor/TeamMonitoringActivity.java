@@ -1,6 +1,5 @@
 package com.coen390.team_d.heartratemonitor;
 
-import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -51,7 +50,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
     private Paint paint = new Paint();
     private int age;
     private int MaxBPM;
-    HeartRatesDO item;
+    HeartRatesDO selectedItem;
 
     private Handler updateHandler;
     private final static int UPDATE_DELAY_SECS = 10;
@@ -107,14 +106,14 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                item = (HeartRatesDO) parent.getItemAtPosition(position);
+                selectedItem = (HeartRatesDO) parent.getItemAtPosition(position);
 
                 //TODO set TextViews with use info
 
                 // Clear graph
                 graph.removeAllSeries();
 
-				series = HeartRateLog.userHRLogs.get(item.getUserId());
+				series = HeartRateLog.userHRLogs.get(selectedItem.getUserId());
 				//Set Graph Formatting
 				paint.setStyle(Paint.Style.STROKE);
 				paint.setStrokeWidth(6);
@@ -139,18 +138,18 @@ public class TeamMonitoringActivity extends AppCompatActivity {
                 ///////////////
                 TextView tv;
                 tv = (TextView) findViewById(R.id.usernameTextview);
-                String name = item.getUserId();
+                String name = selectedItem.getUserId();
                 if (name != null) tv.setText(name);
 
 
-                double dHR = item.getHeartRate();
+                double dHR = selectedItem.getHeartRate();
                 int HR = (int) dHR;
 
                 tv = (TextView) findViewById(R.id.instantBPMTextView);
                 if (tv != null) tv.setText("Heart Rate: " + HR);
 
-                if (item.getAge() != null) {
-                    age = (int) (1 * item.getAge());
+                if (selectedItem.getAge() != null) {
+                    age = (int) (1 * selectedItem.getAge());
                     MaxBPM = (int) (208 - 0.7 * age);
                     //HR Zones Calculation and UI updates
                     HRZones(HR, MaxBPM);
@@ -261,9 +260,13 @@ public class TeamMonitoringActivity extends AppCompatActivity {
             if (hrList == null) return;
 
             //Toast.makeText(getApplicationContext(), "Heart rates updated (" + hrList.size() + ")", Toast.LENGTH_LONG).show();
-            int HR;
-            if (item != null) {
-                HR = (int) (1 * HeartRateLog.userHRLogs.get(item.getUserId()).getHighestValueY());
+            int HR = 0;
+            if (selectedItem != null) {
+                //HR = (int) (1 * HeartRateLog.userHRLogs.get(selectedItem.getUserId()).getHighestValueY());
+                for (HeartRatesDO hr : hrList) {
+                    if (hr.getUserId().equals(selectedItem.getUserId()))
+                        HR = hr.getHeartRate().intValue();
+                }
                 TextView tv;
                 tv = (TextView) findViewById(R.id.instantBPMTextView);
                 if (tv != null) tv.setText("Heart Rate: " + HR);

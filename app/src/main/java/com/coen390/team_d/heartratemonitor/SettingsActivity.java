@@ -145,21 +145,21 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * Handles menu item clicks
+	 * Handles menu selectedItem clicks
 	 */
 	/*
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem selectedItem) {
 
 		// If the "Enable Edit" menu button was clicked, make the text inputs editable
-		switch (item.getItemId()) {
+		switch (selectedItem.getItemId()) {
 			case R.id.enableEdit:
-				// User chose the "Edit" item, make fields editable...
+				// User chose the "Edit" selectedItem, make fields editable...
 				if (!editFlag)
 					toggleEditable();
 				break;
 			default:
-				return super.onOptionsItemSelected(item);
+				return super.onOptionsItemSelected(selectedItem);
 		}
 		return true;
 	}
