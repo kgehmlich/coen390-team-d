@@ -1,8 +1,5 @@
 package com.coen390.team_d.heartratemonitor;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -10,9 +7,6 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 //Graph related imports
 import android.graphics.Color;
@@ -56,7 +50,7 @@ public class TeamMonitoringActivity extends AppCompatActivity {
     private Paint paint = new Paint();
     private int age;
     private int MaxBPM;
-    HeartRatesDO item;
+    HeartRatesDO selectedItem;
 
     private Handler updateHandler;
     private final static int UPDATE_DELAY_SECS = 10;
@@ -112,14 +106,14 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                item = (HeartRatesDO) parent.getItemAtPosition(position);
+                selectedItem = (HeartRatesDO) parent.getItemAtPosition(position);
 
                 //TODO set TextViews with use info
 
                 // Clear graph
                 graph.removeAllSeries();
-				
-				series = HeartRateLog.userHRLogs.get(item.getUserId());
+
+				series = HeartRateLog.userHRLogs.get(selectedItem.getUserId());
 				//Set Graph Formatting
 				paint.setStyle(Paint.Style.STROKE);
 				paint.setStrokeWidth(6);
@@ -144,18 +138,18 @@ public class TeamMonitoringActivity extends AppCompatActivity {
                 ///////////////
                 TextView tv;
                 tv = (TextView) findViewById(R.id.usernameTextview);
-                String name = item.getUserId();
+                String name = selectedItem.getUserId();
                 if (name != null) tv.setText(name);
 
 
-                double dHR = item.getHeartRate();
+                double dHR = selectedItem.getHeartRate();
                 int HR = (int) dHR;
 
                 tv = (TextView) findViewById(R.id.instantBPMTextView);
                 if (tv != null) tv.setText("Heart Rate: " + HR);
 
-                if (item.getAge() != null) {
-                    age = (int) (1 * item.getAge());
+                if (selectedItem.getAge() != null) {
+                    age = (int) (1 * selectedItem.getAge());
                     MaxBPM = (int) (208 - 0.7 * age);
                     //HR Zones Calculation and UI updates
                     HRZones(HR, MaxBPM);
@@ -232,39 +226,6 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         updateHandler.removeCallbacks(updateHeartRates);
     }
 
-
-    /**
-     * Adds toolbar menu to this activity
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.team_monitoring_menu, menu);
-        return true;
-    }
-
-    /**
-     * Handles menu item clicks
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        // If the "Enable Edit" menu button was clicked, make the text inputs editable
-        switch (item.getItemId()) {
-            case R.id.settings:
-                goToSettingsActivity();
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }
-
-    private void goToSettingsActivity() {
-        Intent intent = new Intent(TeamMonitoringActivity.this, SettingsActivity.class);
-        startActivity(intent);
-    }
-
     // Class to asynchronously update the UI with data from server
     private class FetchHeartRates extends AsyncTask<Void, Void, Void> {
         private ArrayList<HeartRatesDO> hrList;
@@ -272,6 +233,9 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             AWSDatabaseHelper dbHelper = new AWSDatabaseHelper(getApplicationContext());
             hrList = dbHelper.getListOfHeartRates();
+
+            if (hrList == null) return null;
+
             DatapointCounter += 10000;
             Boolean GraphScroll = false;
             if (WaitToScroll > 0) {
@@ -292,10 +256,17 @@ public class TeamMonitoringActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Void v) {
-            Toast.makeText(getApplicationContext(), "Heart rates updated (" + hrList.size() + ")", Toast.LENGTH_LONG).show();
-            int HR;
-            if (item != null) {
-                HR = (int) (1 * HeartRateLog.userHRLogs.get(item.getUserId()).getHighestValueY());
+
+            if (hrList == null) return;
+
+            //Toast.makeText(getApplicationContext(), "Heart rates updated (" + hrList.size() + ")", Toast.LENGTH_LONG).show();
+            int HR = 0;
+            if (selectedItem != null) {
+                //HR = (int) (1 * HeartRateLog.userHRLogs.get(selectedItem.getUserId()).getHighestValueY());
+                for (HeartRatesDO hr : hrList) {
+                    if (hr.getUserId().equals(selectedItem.getUserId()))
+                        HR = hr.getHeartRate().intValue();
+                }
                 TextView tv;
                 tv = (TextView) findViewById(R.id.instantBPMTextView);
                 if (tv != null) tv.setText("Heart Rate: " + HR);
