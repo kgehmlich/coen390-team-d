@@ -18,7 +18,7 @@ FetchHeartRates -> AWSDatabaseHelper : Query HeartRates
 activate AWSDatabaseHelper
 AWSDatabaseHelper -> Team_Activity : ArrayList<HeartRatesDO> hrList
 deactivate AWSDatabaseHelper
-Team_Activity -> Team_Activity : Update Listview
+Team_Activity -> Team_Activity : Update ListView
 end
 
 User --> Team_Activity : Click User in ListView
