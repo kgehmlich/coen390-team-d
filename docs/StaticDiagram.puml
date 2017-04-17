@@ -348,6 +348,7 @@ package com.coen390.team_d.heartratemonitor. {
 
     class AWSDatabaseHelper {
         __ Fields __
+        -final static String TAG
         -Context _context
         -String noNameString
         -HeartRatesDO _item
@@ -1551,7 +1552,7 @@ package com.coen390.team_d.heartratemonitor. {
         +onCreate()
         -initializeApplication()
     }
-    class BluetoothAsyncConnector {
+    -class BluetoothAsyncConnector {
         __ Fields __
         final int BLUETOOTH_NOT_SUPPORTED
         final int BLUETOOTH_NOT_ENABLED
@@ -1575,11 +1576,11 @@ package com.coen390.team_d.heartratemonitor. {
         +getListOfHeartRates()
         -send()
     }
-    class BTBondReceiver {
+    -class BTBondReceiver {
         __ Methods __
         +onReceive()
     }
-    class BTBroadcastReceiver {
+    -class BTBroadcastReceiver {
         __ Methods __
         +onReceive()
     }
@@ -1771,6 +1772,7 @@ BTBondReceiver -up--|> BroadcastReceiver
 BTBroadcastReceiver -up--* MainActivity
 BTBondReceiver -up--* MainActivity
 NewConnectedListener -left--o MainActivity
+BluetoothAsyncConnector -left--* MainActivity
 
 HeartRatesDO -up--o AWSDatabaseHelper
 SettingsActivity -up..> SharedPreferences
