@@ -20,5 +20,10 @@ AWSDatabaseHelper -> Team_Activity : ArrayList<HeartRatesDO> hrList
 deactivate AWSDatabaseHelper
 Team_Activity -> Team_Activity : Update Listview
 end
+
+User --> Team_Activity : Click User in ListView
+group Updates at 1S/10s
+Team_Activity -> Team_Activity : Update Graphs and TextViews
+end
 ... Monitoring ...
 @enduml
